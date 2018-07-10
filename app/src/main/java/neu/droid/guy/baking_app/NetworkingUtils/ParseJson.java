@@ -1,0 +1,69 @@
+package neu.droid.guy.baking_app.NetworkingUtils;
+
+import android.content.Context;
+import android.util.Log;
+
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
+
+import neu.droid.guy.baking_app.Pojo.Baking;
+import timber.log.Timber;
+
+public class ParseJson {
+
+    private getJsonResponseAsync mResponseAsync;
+
+    public ParseJson(getJsonResponseAsync responseAsync) {
+        mResponseAsync = responseAsync;
+    }
+
+    /**
+     * @param urlToHit
+     * @param context
+     */
+    public void makeNetworkRequest(String urlToHit, Context context) {
+        JsonArrayRequest arrayRequest = new JsonArrayRequest(
+                Request.Method.GET,
+                urlToHit,
+                null,
+                new Response.Listener<JSONArray>() {
+                    @Override
+                    public void onResponse(JSONArray response) {
+                        // Use Gson to parse response
+                        Gson gson = new Gson();
+                        Type founderListType = new TypeToken<ArrayList<Baking>>() {
+                        }.getType();
+                        // Change the JsonArray to ArrayList of Baking objects
+                        List<Baking> listOfBakingObjects = gson.fromJson(response.toString(), founderListType);
+                        // To send data to calling activity async
+                        mResponseAsync.getResponse(listOfBakingObjects);
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Timber.e(error.toString());
+                    }
+                });
+
+        VolleyNetworkQueue.getInstance(context).getRequestQueue().add(arrayRequest);
+    }
+
+
+    public interface getJsonResponseAsync {
+        void getResponse(List<Baking> listOfBaking);
+    }
+}

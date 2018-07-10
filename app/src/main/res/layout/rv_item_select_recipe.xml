@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="10dp">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <!--https://www.pexels.com/photo/pizza-kitchen-recipe-rolling-pin-9510/-->
+        <ImageView
+            android:id="@+id/recipe_image_main"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:alpha="0.5"
+            android:scaleType="centerCrop"
+            android:src="@drawable/recipe" />
+
+        <android.support.v7.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="10dp">
+
+                <TextView
+                    android:id="@+id/recipe_name"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="3"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                    android:textStyle="bold"
+                    tools:text="Apple Pie" />
+
+                <TextView
+                    android:id="@+id/recipe_serves_people_number"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                    android:textStyle="bold"
+                    tools:text="Serves 8" />
+
+                <!--https://flaticons.net/customize.php?dir=Mobile%20Application&icon=Heart.png-->
+                <ImageButton
+                    android:id="@+id/recipe_fav_button"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="#FFF"
+                    android:gravity="end"
+                    android:src="@drawable/like_enabled"
+                    android:contentDescription="TODO" />
+            </LinearLayout>
+
+        </android.support.v7.widget.CardView>
+
+    </FrameLayout>
+</android.support.v7.widget.CardView>
+
