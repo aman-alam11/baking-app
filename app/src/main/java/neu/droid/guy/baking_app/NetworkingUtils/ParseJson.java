@@ -1,4 +1,5 @@
 package neu.droid.guy.baking_app.NetworkingUtils;
+//https://futurestud.io/tutorials/gson-mapping-of-arrays-and-lists-of-objects
 
 import android.content.Context;
 import android.util.Log;
@@ -44,14 +45,15 @@ public class ParseJson {
                     public void onResponse(JSONArray response) {
                         // Use Gson to parse response
                         Gson gson = new Gson();
-                        Type founderListType = new TypeToken<ArrayList<Baking>>() {
+                        Type bakingResponseListType = new TypeToken<ArrayList<Baking>>() {
                         }.getType();
                         // Change the JsonArray to ArrayList of Baking objects
-                        List<Baking> listOfBakingObjects = gson.fromJson(response.toString(), founderListType);
+                        List<Baking> listOfBakingObjects = gson.fromJson(response.toString(), bakingResponseListType);
                         // To send data to calling activity async
                         mResponseAsync.getResponse(listOfBakingObjects);
                     }
                 },
+                // TODO: Handle Error properly
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
@@ -63,6 +65,9 @@ public class ParseJson {
     }
 
 
+    /**
+     * An interface to transfer data to calling activity in an async manner
+     */
     public interface getJsonResponseAsync {
         void getResponse(List<Baking> listOfBaking);
     }

@@ -1,33 +1,35 @@
-package neu.droid.guy.baking_app;
+package neu.droid.guy.baking_app.Steps;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.List;
+import java.util.zip.Inflater;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import neu.droid.guy.baking_app.Pojo.Baking;
+import neu.droid.guy.baking_app.Pojo.Steps;
+import neu.droid.guy.baking_app.R;
 
-public class SelectRecipeAdapter extends RecyclerView.Adapter<SelectRecipeAdapter.SelectRecipeViewHolder> {
-    private List<Baking> mListOfBakingObjects;
+public class StepsAdapter extends RecyclerView.Adapter<StepsAdapter.StepsViewHolder> {
+    private List<Steps> mListOfSteps;
     private Context mContext;
 
-    public SelectRecipeAdapter(List<Baking> listOfBakingObj, Context context) {
-        mListOfBakingObjects = listOfBakingObj;
+    public StepsAdapter(List<Steps> listOfSteps, Context context) {
+        mListOfSteps = listOfSteps;
         mContext = context;
     }
 
     /**
-     * Called when RecyclerView needs a new {@link SelectRecipeViewHolder} of the given type to represent
+     * Called when RecyclerView needs a new {@link StepsViewHolder} of the given type to represent
      * an item.
      * <p>
      * This new ViewHolder should be constructed with a new View that can represent the items
@@ -35,7 +37,7 @@ public class SelectRecipeAdapter extends RecyclerView.Adapter<SelectRecipeAdapte
      * layout file.
      * <p>
      * The new ViewHolder will be used to display items of the adapter using
-     * {@link #onBindViewHolder(SelectRecipeViewHolder, int)}. Since it will be re-used to display
+     * {@link #onBindViewHolder(StepsViewHolder, int)}. Since it will be re-used to display
      * different items in the data set, it is a good idea to cache references to sub views of
      * the View to avoid unnecessary {@link View#findViewById(int)} calls.
      *
@@ -44,18 +46,19 @@ public class SelectRecipeAdapter extends RecyclerView.Adapter<SelectRecipeAdapte
      * @param viewType The view type of the new View.
      * @return A new ViewHolder that holds a View of the given view type.
      * @see #getItemViewType(int)
-     * @see #onBindViewHolder(SelectRecipeViewHolder, int)
+     * @see #onBindViewHolder(StepsViewHolder, int)
      */
+    @NonNull
     @Override
-    public SelectRecipeViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(mContext).inflate(R.layout.rv_item_select_recipe,
+    public StepsViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View viewHolderView = LayoutInflater.from(mContext).inflate(R.layout.rv_item_view_steps,
                 parent, false);
-        return new SelectRecipeViewHolder(view);
+        return new StepsViewHolder(viewHolderView);
     }
 
     /**
      * Called by RecyclerView to display the data at the specified position. This method should
-     * update the contents of the {@link SelectRecipeViewHolder#itemView} to reflect the item at the given
+     * update the contents of the {@link StepsViewHolder#itemView} to reflect the item at the given
      * position.
      * <p>
      * Note that unlike {@link ListView}, RecyclerView will not call this method
@@ -63,10 +66,10 @@ public class SelectRecipeAdapter extends RecyclerView.Adapter<SelectRecipeAdapte
      * invalidated or the new position cannot be determined. For this reason, you should only
      * use the <code>position</code> parameter while acquiring the related data item inside
      * this method and should not keep a copy of it. If you need the position of an item later
-     * on (e.g. in a click listener), use {@link SelectRecipeViewHolder#getAdapterPosition()} which will
+     * on (e.g. in a click listener), use {@link StepsViewHolder#getAdapterPosition()} which will
      * have the updated adapter position.
      * <p>
-     * Override {@link #onBindViewHolder(SelectRecipeViewHolder, int)} instead if Adapter can
+     * Override {@link #onBindViewHolder(StepsViewHolder, int)} instead if Adapter can
      * handle efficient partial bind.
      *
      * @param holder   The ViewHolder which should be updated to represent the contents of the
@@ -74,9 +77,8 @@ public class SelectRecipeAdapter extends RecyclerView.Adapter<SelectRecipeAdapte
      * @param position The position of the item within the adapter's data set.
      */
     @Override
-    public void onBindViewHolder(SelectRecipeViewHolder holder, int position) {
-        holder.bindViews(mListOfBakingObjects.get(position).getName(),
-                mListOfBakingObjects.get(position).getServings());
+    public void onBindViewHolder(@NonNull StepsViewHolder holder, int position) {
+        holder.stepsDescTextView.setText(StringUtils.capitalize(mListOfSteps.get(position).getShortDescription()));
     }
 
     /**
@@ -86,35 +88,33 @@ public class SelectRecipeAdapter extends RecyclerView.Adapter<SelectRecipeAdapte
      */
     @Override
     public int getItemCount() {
-        if (mListOfBakingObjects != null && mListOfBakingObjects.size() > 0) {
-            return mListOfBakingObjects.size();
+        if (mListOfSteps != null && mListOfSteps.size() > 0) {
+            return mListOfSteps.size();
         }
         return 0;
     }
 
 
     /**
-     *
+     * View Holder
      */
-    class SelectRecipeViewHolder extends RecyclerView.ViewHolder {
-        @BindView(R.id.recipe_name)
-        TextView recipeName;
-        @BindView(R.id.recipe_image_main)
-        ImageView recipeImageMain;
-        @BindView(R.id.recipe_serves_people_number)
-        TextView recipeServesPeopleNum;
-        @BindView(R.id.recipe_fav_button)
-        ImageButton isRecipeFav;
+    class StepsViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+        @BindView(R.id.step_short_description)
+        TextView stepsDescTextView;
 
-        public SelectRecipeViewHolder(View itemView) {
+        public StepsViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
         }
 
-        private void bindViews(String name, int servings) {
-            recipeName.setText(name);
-//            recipeImageMain.setImageResource();
-            recipeServesPeopleNum.setText("" + servings);
+        /**
+         * Called when a view has been clicked.
+         *
+         * @param v The view that was clicked.
+         */
+        @Override
+        public void onClick(View v) {
+
         }
     }
 }
