@@ -6,18 +6,25 @@ import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import neu.droid.guy.baking_app.Pojo.Steps;
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import neu.droid.guy.baking_app.model.Baking;
+import neu.droid.guy.baking_app.model.Steps;
 import neu.droid.guy.baking_app.R;
 
+import static neu.droid.guy.baking_app.Recipe.MainActivity.RECIPE_INTENT_KEY;
 import static neu.droid.guy.baking_app.Recipe.MainActivity.STEPS_INTENT_KEY;
 
 public class StepsViewFragment extends Fragment {
@@ -26,10 +33,10 @@ public class StepsViewFragment extends Fragment {
     public StepsViewFragment() {
     }
 
-    public static StepsViewFragment newInstance(List<Steps> stepsList) {
+    public static StepsViewFragment newInstance(List<Steps> listOfSteps) {
         StepsViewFragment fragment = new StepsViewFragment();
         Bundle args = new Bundle();
-        args.putParcelableArrayList(STEPS_INTENT_KEY, (ArrayList<? extends Parcelable>) stepsList);
+        args.putParcelableArrayList(STEPS_INTENT_KEY, (ArrayList<? extends Parcelable>) listOfSteps);
         fragment.setArguments(args);
         return fragment;
     }
@@ -71,15 +78,20 @@ public class StepsViewFragment extends Fragment {
         if (rootView instanceof RecyclerView) {
             Context context = rootView.getContext();
             RecyclerView mStepsRV = (RecyclerView) rootView;
+
             // Init Layout Manager
             LinearLayoutManager recyclerViewManager = new LinearLayoutManager(context);
             recyclerViewManager.setOrientation(LinearLayoutManager.VERTICAL);
             mStepsRV.setLayoutManager(recyclerViewManager);
             // Init Adapter
-            StepsAdapter mStepsAdapter = new StepsAdapter(mListOfSteps, context);
+            StepsAdapter mStepsAdapter = new StepsAdapter(mListOfSteps,
+                    (StepsAdapter.getSelectedStepIndex) context,
+                    context);
             // Set Adapter on Recycler View
             mStepsRV.setAdapter(mStepsAdapter);
         }
+
+
         return rootView;
     }
 

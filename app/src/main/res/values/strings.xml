@@ -2,5 +2,6 @@
     <string name="app_name">baking-app</string>
     <string name="checklist_text_view_text">Make A Checklist Of All The Ingredients</string>
     <string name="empty_ingredients_array_toast">Ingredients not available</string>
-    <string name="show_ingredients_button_text">Show Ingredients for Recipe</string>
+    <string name="show_ingredients_button_text">Show Ingredients for: </string>
+    <string name="show_ingredients_button_text_generic">Show Ingredients </string>
 </resources>

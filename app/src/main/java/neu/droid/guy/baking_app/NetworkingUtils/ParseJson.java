@@ -8,20 +8,16 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
 import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
-import neu.droid.guy.baking_app.Pojo.Baking;
-import timber.log.Timber;
+import neu.droid.guy.baking_app.model.Baking;
 
 public class ParseJson {
 
@@ -57,7 +53,7 @@ public class ParseJson {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Timber.e(error.toString());
+                        Log.e(this.getClass().getSimpleName(), error.toString());
                     }
                 });
 

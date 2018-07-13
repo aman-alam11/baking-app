@@ -1,31 +1,47 @@
 package neu.droid.guy.baking_app.Steps;
 
 import android.content.Context;
+import android.content.Intent;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
-import java.util.zip.Inflater;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import neu.droid.guy.baking_app.Pojo.Steps;
+import neu.droid.guy.baking_app.Video.Video;
+import neu.droid.guy.baking_app.model.Baking;
+import neu.droid.guy.baking_app.model.Steps;
 import neu.droid.guy.baking_app.R;
+
+import static neu.droid.guy.baking_app.Recipe.MainActivity.RECIPE_INTENT_KEY;
 
 public class StepsAdapter extends RecyclerView.Adapter<StepsAdapter.StepsViewHolder> {
     private List<Steps> mListOfSteps;
     private Context mContext;
+    public static String STEP_NUMBER_INTENT = "STEP_NUMBER_INTENT";
+    private getSelectedStepIndex mSelectedStepInterface;
 
-    public StepsAdapter(List<Steps> listOfSteps, Context context) {
+    StepsAdapter(List<Steps> listOfSteps, getSelectedStepIndex selectedIndexInterface, Context context) {
         mListOfSteps = listOfSteps;
         mContext = context;
+        mSelectedStepInterface = selectedIndexInterface;
+    }
+
+    public interface getSelectedStepIndex {
+        void selectedStepPosition(int index);
     }
 
     /**
@@ -79,6 +95,9 @@ public class StepsAdapter extends RecyclerView.Adapter<StepsAdapter.StepsViewHol
     @Override
     public void onBindViewHolder(@NonNull StepsViewHolder holder, int position) {
         holder.stepsDescTextView.setText(StringUtils.capitalize(mListOfSteps.get(position).getShortDescription()));
+        if (TextUtils.isEmpty(mListOfSteps.get(position).getVideoURL())) {
+            holder.iconImageView.setImageDrawable(mContext.getResources().getDrawable(R.drawable.cookingpan24));
+        }
     }
 
     /**
@@ -98,13 +117,19 @@ public class StepsAdapter extends RecyclerView.Adapter<StepsAdapter.StepsViewHol
     /**
      * View Holder
      */
-    class StepsViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+    class StepsViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         @BindView(R.id.step_short_description)
         TextView stepsDescTextView;
+        @BindView(R.id.icon_image_view)
+        ImageView iconImageView;
+        @BindView(R.id.steps_card_view)
+        CardView mStepsCardView;
 
-        public StepsViewHolder(View itemView) {
+
+        StepsViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
+            itemView.setOnClickListener(this);
         }
 
         /**
@@ -114,7 +139,7 @@ public class StepsAdapter extends RecyclerView.Adapter<StepsAdapter.StepsViewHol
          */
         @Override
         public void onClick(View v) {
-
+            mSelectedStepInterface.selectedStepPosition(getAdapterPosition());
         }
     }
 }

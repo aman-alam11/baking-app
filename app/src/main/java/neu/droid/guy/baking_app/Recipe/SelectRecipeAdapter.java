@@ -13,7 +13,7 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import neu.droid.guy.baking_app.Pojo.Baking;
+import neu.droid.guy.baking_app.model.Baking;
 import neu.droid.guy.baking_app.R;
 
 public class SelectRecipeAdapter extends RecyclerView.Adapter<SelectRecipeAdapter.SelectRecipeViewHolder> {

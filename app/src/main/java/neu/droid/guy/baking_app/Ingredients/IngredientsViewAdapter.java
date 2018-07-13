@@ -18,7 +18,7 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import neu.droid.guy.baking_app.Pojo.Ingredients;
+import neu.droid.guy.baking_app.model.Ingredients;
 import neu.droid.guy.baking_app.R;
 
 public class IngredientsViewAdapter extends

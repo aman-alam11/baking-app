@@ -40,14 +40,13 @@ dependencies {
 //    JSON Parsing
     implementation 'com.google.code.gson:gson:2.8.4'
 
-//    Database ORM Room
-//    implementation "android.arch.persistence.room:runtime:1.1.1"
-//    annotationProcessor "android.arch.persistence.room:compiler:1.1.1"
+    //ExoPlayer
+    implementation 'com.google.android.exoplayer:exoplayer-core:2.7.3'
+    implementation 'com.google.android.exoplayer:exoplayer-ui:2.7.3'
+
 //    View Model and Live Data
 //    implementation "android.arch.lifecycle:extensions:1.1.1"
 //    annotationProcessor "android.arch.lifecycle:compiler:1.1.1"
-//    Timber
-    implementation 'com.jakewharton.timber:timber:4.7.0'
 
 //    testImplementation 'junit:junit:4.12'
 //    androidTestImplementation 'com.android.support.test:runner:1.0.2'

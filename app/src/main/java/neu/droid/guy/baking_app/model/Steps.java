@@ -1,4 +1,4 @@
-package neu.droid.guy.baking_app.Pojo;
+package neu.droid.guy.baking_app.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;

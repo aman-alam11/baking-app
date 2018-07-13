@@ -22,6 +22,7 @@
             android:name=".Ingredients.IngredientsView"
             android:launchMode="singleTop" />
         <activity android:name=".Steps.StepsView" />
+        <activity android:name=".Video.Video"></activity>
     </application>
 
 </manifest>

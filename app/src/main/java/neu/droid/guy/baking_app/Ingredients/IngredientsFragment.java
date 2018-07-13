@@ -15,7 +15,7 @@ import android.view.ViewGroup;
 import java.util.ArrayList;
 import java.util.List;
 
-import neu.droid.guy.baking_app.Pojo.Ingredients;
+import neu.droid.guy.baking_app.model.Ingredients;
 import neu.droid.guy.baking_app.R;
 
 import static neu.droid.guy.baking_app.Recipe.MainActivity.INGREDIENTS_INTENT_KEY;

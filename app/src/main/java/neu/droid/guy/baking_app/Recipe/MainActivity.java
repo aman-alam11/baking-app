@@ -14,7 +14,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import neu.droid.guy.baking_app.NetworkingUtils.BuildUrl;
 import neu.droid.guy.baking_app.NetworkingUtils.ParseJson;
-import neu.droid.guy.baking_app.Pojo.Baking;
+import neu.droid.guy.baking_app.model.Baking;
 import neu.droid.guy.baking_app.R;
 import neu.droid.guy.baking_app.Steps.StepsView;
 
@@ -22,10 +22,10 @@ public class MainActivity extends AppCompatActivity
         implements ParseJson.getJsonResponseAsync,
         SelectRecipeAdapter.ItemClickListener {
 
-
     private SelectRecipeAdapter mRecipeAdapter;
     public static final String INGREDIENTS_INTENT_KEY = "INGREDIENTS_INTENT_KEY";
     public static final String STEPS_INTENT_KEY = "STEPS_INTENT_KEY";
+    public static final String RECIPE_INTENT_KEY = "RECIPE_INTENT_KEY";
     List<Baking> mLocalBakingList = new ArrayList<>();
 
     @BindView(R.id.select_recipe_recycler_view)
@@ -36,6 +36,7 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+        setTitle("Recipes");
 
         ParseJson json = new ParseJson(this);
         json.makeNetworkRequest(BuildUrl.buildRecipeUrl(), this);
@@ -73,10 +74,7 @@ public class MainActivity extends AppCompatActivity
         }
 
         Intent openRecipeDetails = new Intent(this, StepsView.class);
-        openRecipeDetails.putParcelableArrayListExtra(INGREDIENTS_INTENT_KEY,
-                (ArrayList<? extends Parcelable>) mLocalBakingList.get(position).getIngredients());
-        openRecipeDetails.putParcelableArrayListExtra(STEPS_INTENT_KEY,
-                (ArrayList<? extends Parcelable>) mLocalBakingList.get(position).getSteps());
+        openRecipeDetails.putExtra(RECIPE_INTENT_KEY, mLocalBakingList.get(position));
         startActivity(openRecipeDetails);
     }
 
