@@ -44,8 +44,7 @@ import static neu.droid.guy.baking_app.Recipe.MainActivity.STEPS_INTENT_KEY;
 import static neu.droid.guy.baking_app.Steps.StepsAdapter.STEP_NUMBER_INTENT;
 
 // TODO: Implement Media Session
-//TODO: If url null, hide video player
-//TODO: Handle rotation
+// TODO: Handle rotation
 // TODO: progress Bar
 // TODO: Master slave view
 // TODO: Landscape mode
@@ -87,6 +86,9 @@ public class Video extends AppCompatActivity implements ExoPlayer.EventListener 
                 mSelectedStepNumber = getIntent().getExtras().getInt(STEP_NUMBER_INTENT);
                 mCurrentStep = mListOfSteps.get(mSelectedStepNumber);
                 mVideoUrl = mCurrentStep.getVideoURL();
+                if (!TextUtils.isEmpty(mVideoUrl) && mMediaPlayer == null) {
+                    initializePlayer();
+                }
                 mDescriptionTextView.setText(mCurrentStep.getDescription());
             } catch (Exception e) {
                 e.printStackTrace();
@@ -135,8 +137,12 @@ public class Video extends AppCompatActivity implements ExoPlayer.EventListener 
     @Override
     protected void onStart() {
         super.onStart();
-        if (Build.VERSION.SDK_INT > 23)
+        if (!TextUtils.isEmpty(mVideoUrl) && Build.VERSION.SDK_INT > 23) {
+            mPlayerView.setVisibility(View.VISIBLE);
             initializePlayer();
+        } else {
+            noVideoView();
+        }
     }
 
     /**
@@ -145,10 +151,21 @@ public class Video extends AppCompatActivity implements ExoPlayer.EventListener 
     @Override
     protected void onResume() {
         super.onResume();
-        hideSystemUi();
-        if (Build.VERSION.SDK_INT <= 23) {
+//        hideSystemUi();
+        if (!TextUtils.isEmpty(mVideoUrl) && Build.VERSION.SDK_INT <= 23) {
+            mPlayerView.setVisibility(View.VISIBLE);
+            mDescriptionTextView.setBackground(null);
+            mDescriptionTextView.setTextColor(getResources().getColor(R.color.black));
             initializePlayer();
+        } else {
+            noVideoView();
         }
+    }
+
+    private void noVideoView() {
+        mPlayerView.setVisibility(View.GONE);
+        mDescriptionTextView.setBackground(getResources().getDrawable(R.drawable.rectangle));
+        mDescriptionTextView.setTextColor(getResources().getColor(R.color.white));
     }
 
 

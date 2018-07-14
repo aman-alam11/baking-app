@@ -1,14 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".Recipe.MainActivity">
 
+    <!--https://www.flaticon.com/free-icon/fuel_545927#term=empty&page=1&position=46-->
+    <ImageView
+        android:id="@+id/no_data_empty_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:src="@drawable/empty_view"
+        android:visibility="gone" />
+
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/select_recipe_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
-</android.support.constraint.ConstraintLayout>
+</FrameLayout>

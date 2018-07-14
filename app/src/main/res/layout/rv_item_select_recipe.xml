@@ -19,41 +19,48 @@
             android:scaleType="centerCrop"
             android:src="@drawable/recipe" />
 
-        <android.support.v7.widget.CardView
+
+        <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom">
+            android:layout_gravity="bottom"
+            android:background="@drawable/rectangle"
+            android:padding="10dp">
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:padding="10dp">
+            <TextView
+                android:id="@+id/recipe_name"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:gravity="center_vertical"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                android:textColor="#FFF"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toStartOf="@+id/recipe_serves_people_number"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/recipe_serves_people_number"
+                tools:text="Apple Pie" />
 
-                <TextView
-                    android:id="@+id/recipe_name"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="3"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                    android:textStyle="bold"
-                    tools:text="Apple Pie" />
+            <TextView
+                android:id="@+id/recipe_serves_people_number"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/circle"
+                android:gravity="center"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                android:textColor="#FFF"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="8" />
 
-                <TextView
-                    android:id="@+id/recipe_serves_people_number"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                    android:textStyle="bold"
-                    tools:text="Serves 8" />
 
-                <!--Todo: Have a circle which shows 8-->
-
-            </LinearLayout>
-
-        </android.support.v7.widget.CardView>
-
+        </android.support.constraint.ConstraintLayout>
     </FrameLayout>
 </android.support.v7.widget.CardView>
 

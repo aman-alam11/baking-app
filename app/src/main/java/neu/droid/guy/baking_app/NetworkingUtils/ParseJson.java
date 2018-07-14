@@ -2,6 +2,9 @@ package neu.droid.guy.baking_app.NetworkingUtils;
 //https://futurestud.io/tutorials/gson-mapping-of-arrays-and-lists-of-objects
 
 import android.content.Context;
+import android.content.DialogInterface;
+import android.os.Build;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 
 import com.android.volley.Request;
@@ -22,6 +25,7 @@ import neu.droid.guy.baking_app.model.Baking;
 public class ParseJson {
 
     private getJsonResponseAsync mResponseAsync;
+    private ErrorListener mDeliverError;
 
     public ParseJson(getJsonResponseAsync responseAsync) {
         mResponseAsync = responseAsync;
@@ -31,7 +35,7 @@ public class ParseJson {
      * @param urlToHit
      * @param context
      */
-    public void makeNetworkRequest(String urlToHit, Context context) {
+    public void makeNetworkRequest(String urlToHit, Context context, final ErrorListener errorListener) {
         JsonArrayRequest arrayRequest = new JsonArrayRequest(
                 Request.Method.GET,
                 urlToHit,
@@ -39,14 +43,7 @@ public class ParseJson {
                 new Response.Listener<JSONArray>() {
                     @Override
                     public void onResponse(JSONArray response) {
-                        // Use Gson to parse response
-                        Gson gson = new Gson();
-                        Type bakingResponseListType = new TypeToken<ArrayList<Baking>>() {
-                        }.getType();
-                        // Change the JsonArray to ArrayList of Baking objects
-                        List<Baking> listOfBakingObjects = gson.fromJson(response.toString(), bakingResponseListType);
-                        // To send data to calling activity async
-                        mResponseAsync.getResponse(listOfBakingObjects);
+                        parseJsonArrayUsingGson(response.toString());
                     }
                 },
                 // TODO: Handle Error properly
@@ -54,10 +51,28 @@ public class ParseJson {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         Log.e(this.getClass().getSimpleName(), error.toString());
+                        mDeliverError = errorListener;
+                        mDeliverError.getErrorMessage(error.getMessage());
                     }
                 });
 
         VolleyNetworkQueue.getInstance(context).getRequestQueue().add(arrayRequest);
+    }
+
+    /**
+     * Parse the JSON Array using GSON
+     *
+     * @param response
+     */
+    public void parseJsonArrayUsingGson(String response) {
+        // Use Gson to parse response
+        Gson gson = new Gson();
+        Type bakingResponseListType = new TypeToken<ArrayList<Baking>>() {
+        }.getType();
+        // Change the JsonArray to ArrayList of Baking objects
+        List<Baking> listOfBakingObjects = gson.fromJson(response, bakingResponseListType);
+        // To send data to calling activity async
+        mResponseAsync.getResponse(listOfBakingObjects);
     }
 
 
