@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -25,6 +26,7 @@ import neu.droid.guy.baking_app.R;
 
 import static neu.droid.guy.baking_app.Recipe.MainActivity.INGREDIENTS_INTENT_KEY;
 import static neu.droid.guy.baking_app.Recipe.MainActivity.RECIPE_INTENT_KEY;
+import static neu.droid.guy.baking_app.Recipe.MainActivity.STEPS_INTENT_KEY;
 import static neu.droid.guy.baking_app.Steps.StepsAdapter.STEP_NUMBER_INTENT;
 
 public class StepsView extends AppCompatActivity implements StepsAdapter.getSelectedStepIndex {
@@ -34,7 +36,6 @@ public class StepsView extends AppCompatActivity implements StepsAdapter.getSele
 
     @BindView(R.id.show_ingredients_button)
     Button mShowIngredients;
-    private String mRecipeName;
 
     //TODO: Handle orientation changes
 
@@ -48,10 +49,10 @@ public class StepsView extends AppCompatActivity implements StepsAdapter.getSele
         StepsViewFragment stepsFragment = null;
         if (getIntent().hasExtra(RECIPE_INTENT_KEY)) {
             try {
-                mSelectedRecipe = (Baking) getIntent().getExtras().get(RECIPE_INTENT_KEY);
-                mStepsList = mSelectedRecipe.getSteps();
+                mSelectedRecipe = (Baking) Objects.requireNonNull(getIntent().getExtras()).get(RECIPE_INTENT_KEY);
+                mStepsList = Objects.requireNonNull(mSelectedRecipe).getSteps();
                 stepsFragment = StepsViewFragment.newInstance(mStepsList);
-                mRecipeName = mSelectedRecipe.getName();
+                String mRecipeName = mSelectedRecipe.getName();
                 setTitle(mRecipeName + ": Steps Involved");
                 mShowIngredients.setText(getResources().getString(R.string.show_ingredients_button_text) + " " + mRecipeName);
             } catch (Exception e) {
@@ -83,10 +84,13 @@ public class StepsView extends AppCompatActivity implements StepsAdapter.getSele
         });
     }
 
+    /**
+     * @param index position of step selected
+     */
     @Override
     public void selectedStepPosition(int index) {
         Intent showVideo = new Intent(this, Video.class);
-        showVideo.putExtra(RECIPE_INTENT_KEY, mSelectedRecipe);
+        showVideo.putParcelableArrayListExtra(STEPS_INTENT_KEY, (ArrayList<? extends Parcelable>) mStepsList);
         showVideo.putExtra(STEP_NUMBER_INTENT, index);
         startActivity(showVideo);
     }
