@@ -10,6 +10,7 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -94,9 +95,9 @@ public class StepsAdapter extends RecyclerView.Adapter<StepsAdapter.StepsViewHol
      */
     @Override
     public void onBindViewHolder(@NonNull StepsViewHolder holder, int position) {
-        holder.stepsDescTextView.setText(StringUtils.capitalize(mListOfSteps.get(position).getShortDescription()));
+        holder.mStepsDescTextView.setText(StringUtils.capitalize(mListOfSteps.get(position).getShortDescription()));
         if (TextUtils.isEmpty(mListOfSteps.get(position).getVideoURL())) {
-            holder.iconImageView.setImageDrawable(mContext.getResources().getDrawable(R.drawable.cookingpan24));
+            holder.mIconImageView.setImageDrawable(mContext.getResources().getDrawable(R.drawable.cookingpan24));
         }
     }
 
@@ -119,11 +120,13 @@ public class StepsAdapter extends RecyclerView.Adapter<StepsAdapter.StepsViewHol
      */
     class StepsViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         @BindView(R.id.step_short_description)
-        TextView stepsDescTextView;
+        TextView mStepsDescTextView;
         @BindView(R.id.icon_image_view)
-        ImageView iconImageView;
+        ImageView mIconImageView;
         @BindView(R.id.steps_card_view)
         CardView mStepsCardView;
+        @BindView(R.id.steps_check_box)
+        CheckBox mStepsCheckBox;
 
 
         StepsViewHolder(View itemView) {

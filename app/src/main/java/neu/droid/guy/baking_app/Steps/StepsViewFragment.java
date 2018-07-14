@@ -90,8 +90,6 @@ public class StepsViewFragment extends Fragment {
             // Set Adapter on Recycler View
             mStepsRV.setAdapter(mStepsAdapter);
         }
-
-
         return rootView;
     }
 

@@ -3,6 +3,7 @@ package neu.droid.guy.baking_app.Steps;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.os.PersistableBundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
@@ -45,34 +46,59 @@ public class StepsView extends AppCompatActivity implements StepsAdapter.getSele
         setContentView(R.layout.activity_steps_view);
         ButterKnife.bind(this);
 
-        FragmentManager manager = getSupportFragmentManager();
-        StepsViewFragment stepsFragment = null;
-        if (getIntent().hasExtra(RECIPE_INTENT_KEY)) {
+        // Handle Rotation
+        if (checkSavedInstanceState(savedInstanceState)) {
+            setTitle("Steps Involved");
+            mShowIngredients.setText(getResources().getString(R.string.show_ingredients_button_text_generic));
+        }
+
+        if (getIntent().hasExtra(RECIPE_INTENT_KEY) && mStepsList == null) {
             try {
                 mSelectedRecipe = (Baking) Objects.requireNonNull(getIntent().getExtras()).get(RECIPE_INTENT_KEY);
                 mStepsList = Objects.requireNonNull(mSelectedRecipe).getSteps();
-                stepsFragment = StepsViewFragment.newInstance(mStepsList);
+                mIngredientsList = mSelectedRecipe.getIngredients();
+
                 String mRecipeName = mSelectedRecipe.getName();
                 setTitle(mRecipeName + ": Steps Involved");
                 mShowIngredients.setText(getResources().getString(R.string.show_ingredients_button_text) + " " + mRecipeName);
             } catch (Exception e) {
-                Log.e(this.getClass().getSimpleName(),
-                        "Unable to change activity title / button text");
-                setTitle("Steps Involved");
-                mShowIngredients.setText(getResources().getString(R.string.show_ingredients_button_text_generic));
+                Log.e(this.getClass().getSimpleName(), "Unable to change activity title");
             }
-        } else {
+        }
+
+        fallbackArrays();
+        initFragment();
+    }
+
+    private void fallbackArrays() {
+        if (mStepsList == null) {
             mStepsList = new ArrayList<>();
         }
-        manager.beginTransaction().add(R.id.steps_fragment_container, stepsFragment).commit();
+        if (mIngredientsList == null) {
+            mIngredientsList = new ArrayList<>();
+        }
+    }
+
+    private void initFragment() {
+        StepsViewFragment stepsFragment = StepsViewFragment.newInstance(mStepsList);
+        getSupportFragmentManager().beginTransaction().add(R.id.steps_fragment_container, stepsFragment).commit();
         initIngredientsButton();
     }
 
+    private boolean checkSavedInstanceState(Bundle savedInstanceState) {
+        if (savedInstanceState == null) {
+            return false;
+        }
+
+        mStepsList = savedInstanceState.getParcelableArrayList(STEPS_INTENT_KEY);
+        mIngredientsList = savedInstanceState.getParcelableArrayList(INGREDIENTS_INTENT_KEY);
+        return true;
+    }
+
     /**
-     * Handle clicks on ingredients drop down list
+     * Handle clicks on ingredients button
      */
     private void initIngredientsButton() {
-        mIngredientsList = mSelectedRecipe.getIngredients();
         mShowIngredients.setEnabled(true);
 
         mShowIngredients.setOnClickListener(new View.OnClickListener() {
@@ -93,5 +119,19 @@ public class StepsView extends AppCompatActivity implements StepsAdapter.getSele
         showVideo.putParcelableArrayListExtra(STEPS_INTENT_KEY, (ArrayList<? extends Parcelable>) mStepsList);
         showVideo.putExtra(STEP_NUMBER_INTENT, index);
         startActivity(showVideo);
+    }
+
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (mStepsList != null) {
+            outState.putParcelableArrayList(STEPS_INTENT_KEY,
+                    (ArrayList<? extends Parcelable>) mStepsList);
+        }
+        if (mIngredientsList != null) {
+            outState.putParcelableArrayList(INGREDIENTS_INTENT_KEY,
+                    (ArrayList<? extends Parcelable>) mIngredientsList);
+        }
     }
 }
