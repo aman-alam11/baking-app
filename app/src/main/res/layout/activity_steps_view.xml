@@ -9,18 +9,14 @@
     <android.support.v7.widget.CardView
         android:id="@+id/cardView3"
         android:layout_width="match_parent"
-        android:layout_height="100dp"
+        android:layout_height="wrap_content"
         app:cardElevation="20dp">
 
-        <Button
-            android:id="@+id/show_ingredients_button"
+        <android.support.v7.widget.AppCompatSpinner
+            android:id="@+id/ingredients_spinner"
             android:layout_width="match_parent"
-            android:layout_height="80dp"
-            android:layout_gravity="center"
-            android:backgroundTint="#000"
-            android:text="@string/show_ingredients_button_text"
-            android:textAppearance="@style/TextAppearance.AppCompat.Large"
-            android:textColor="#FFF" />
+            android:layout_height="wrap_content" />
+
     </android.support.v7.widget.CardView>
 
     <FrameLayout

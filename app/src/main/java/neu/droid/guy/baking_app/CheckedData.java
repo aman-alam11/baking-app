@@ -10,6 +10,7 @@ public class CheckedData {
 
     private CheckedData() {
         mIngredientsHashMap = new HashMap<>();
+        mStepsHashMap = new HashMap<>();
     }
 
 
@@ -21,11 +22,17 @@ public class CheckedData {
     }
 
 
-    public HashMap getIngredientsCompleted() {
-        return mIngredientsHashMap;
+    public HashMap getIngredientsCompleted(int recipeNumber) {
+        if (mIngredientsHashMap.get(recipeNumber) == null) {
+            mIngredientsHashMap.put(recipeNumber, new HashMap<Integer, Boolean>());
+        }
+        return mIngredientsHashMap.get(recipeNumber);
     }
 
-    public HashMap getStepsCompleted() {
-        return mStepsHashMap;
+    public HashMap getStepsCompleted(int recipeNumber) {
+        if (mStepsHashMap.get(recipeNumber) == null) {
+            mStepsHashMap.put(recipeNumber, new HashMap<Integer, Boolean>());
+        }
+        return mStepsHashMap.get(recipeNumber);
     }
 }

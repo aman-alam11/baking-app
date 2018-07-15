@@ -18,10 +18,13 @@ import android.widget.Toast;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import neu.droid.guy.baking_app.CheckedData;
 import neu.droid.guy.baking_app.Video.Video;
 import neu.droid.guy.baking_app.model.Baking;
 import neu.droid.guy.baking_app.model.Steps;
@@ -34,11 +37,16 @@ public class StepsAdapter extends RecyclerView.Adapter<StepsAdapter.StepsViewHol
     private Context mContext;
     public static String STEP_NUMBER_INTENT = "STEP_NUMBER_INTENT";
     private getSelectedStepIndex mSelectedStepInterface;
+    private Integer mRecipeId;
 
-    StepsAdapter(List<Steps> listOfSteps, getSelectedStepIndex selectedIndexInterface, Context context) {
+    StepsAdapter(List<Steps> listOfSteps,
+                 getSelectedStepIndex selectedIndexInterface,
+                 Context context,
+                 Integer currentRecipeId) {
         mListOfSteps = listOfSteps;
         mContext = context;
         mSelectedStepInterface = selectedIndexInterface;
+        mRecipeId = currentRecipeId;
     }
 
     public interface getSelectedStepIndex {
@@ -99,6 +107,10 @@ public class StepsAdapter extends RecyclerView.Adapter<StepsAdapter.StepsViewHol
         if (TextUtils.isEmpty(mListOfSteps.get(position).getVideoURL())) {
             holder.mIconImageView.setImageDrawable(mContext.getResources().getDrawable(R.drawable.cookingpan24));
         }
+        Boolean isStepCompleted = (Boolean) CheckedData.newInstance().getStepsCompleted(mRecipeId).get(position);
+        if (isStepCompleted != null) {
+            holder.mStepsCheckBox.setChecked(isStepCompleted);
+        }
     }
 
     /**
@@ -142,6 +154,9 @@ public class StepsAdapter extends RecyclerView.Adapter<StepsAdapter.StepsViewHol
          */
         @Override
         public void onClick(View v) {
+            if (CheckedData.newInstance().getStepsCompleted(mRecipeId).get(getAdapterPosition()) != null) {
+                mStepsCheckBox.setChecked((Boolean) CheckedData.newInstance().getStepsCompleted(mRecipeId).get(getAdapterPosition()));
+            }
             mSelectedStepInterface.selectedStepPosition(getAdapterPosition());
         }
     }

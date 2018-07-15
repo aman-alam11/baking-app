@@ -26,17 +26,21 @@ import neu.droid.guy.baking_app.R;
 
 import static neu.droid.guy.baking_app.Recipe.MainActivity.RECIPE_INTENT_KEY;
 import static neu.droid.guy.baking_app.Recipe.MainActivity.STEPS_INTENT_KEY;
+import static neu.droid.guy.baking_app.Steps.StepsView.CURRENT_RECIPE_ID;
 
-public class StepsViewFragment extends Fragment {
+public class StepsViewFragment extends Fragment{
     private List<Steps> mListOfSteps;
+    private int mCurrentRecipeId;
+    private StepsAdapter mStepsAdapter;
 
     public StepsViewFragment() {
     }
 
-    public static StepsViewFragment newInstance(List<Steps> listOfSteps) {
+    public static StepsViewFragment newInstance(List<Steps> listOfSteps, int recipeId) {
         StepsViewFragment fragment = new StepsViewFragment();
         Bundle args = new Bundle();
         args.putParcelableArrayList(STEPS_INTENT_KEY, (ArrayList<? extends Parcelable>) listOfSteps);
+        args.putInt(CURRENT_RECIPE_ID, recipeId);
         fragment.setArguments(args);
         return fragment;
     }
@@ -47,6 +51,7 @@ public class StepsViewFragment extends Fragment {
 
         if (getArguments() != null) {
             mListOfSteps = getArguments().getParcelableArrayList(STEPS_INTENT_KEY);
+            mCurrentRecipeId = getArguments().getInt(CURRENT_RECIPE_ID);
         }
     }
 
@@ -84,13 +89,17 @@ public class StepsViewFragment extends Fragment {
             recyclerViewManager.setOrientation(LinearLayoutManager.VERTICAL);
             mStepsRV.setLayoutManager(recyclerViewManager);
             // Init Adapter
-            StepsAdapter mStepsAdapter = new StepsAdapter(mListOfSteps,
+            mStepsAdapter = new StepsAdapter(mListOfSteps,
                     (StepsAdapter.getSelectedStepIndex) context,
-                    context);
+                    context, mCurrentRecipeId);
             // Set Adapter on Recycler View
             mStepsRV.setAdapter(mStepsAdapter);
         }
         return rootView;
     }
 
+
+    public void updateSelectedItem(int position) {
+        mStepsAdapter.notifyItemChanged(position);
+    }
 }

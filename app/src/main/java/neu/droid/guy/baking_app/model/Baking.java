@@ -6,6 +6,7 @@ import android.os.Parcelable;
 import java.util.List;
 
 public class Baking implements Parcelable {
+    private int id;
     private String name;
     private String image;
     private int servings;
@@ -13,6 +14,7 @@ public class Baking implements Parcelable {
     private List<Steps> steps;
 
     protected Baking(Parcel in) {
+        id = in.readInt();
         name = in.readString();
         image = in.readString();
         servings = in.readInt();
@@ -31,6 +33,10 @@ public class Baking implements Parcelable {
             return new Baking[size];
         }
     };
+
+    public int getId(){
+        return id;
+    }
 
     public String getName() {
         return name;
@@ -96,6 +102,7 @@ public class Baking implements Parcelable {
      */
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(id);
         dest.writeString(name);
         dest.writeString(image);
         dest.writeInt(servings);

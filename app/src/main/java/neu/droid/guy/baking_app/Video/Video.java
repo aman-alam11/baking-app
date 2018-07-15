@@ -1,15 +1,25 @@
 package neu.droid.guy.baking_app.Video;
 
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Parcelable;
 import android.os.PersistableBundle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.DefaultRenderersFactory;
@@ -29,12 +39,16 @@ import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 
+import org.w3c.dom.Text;
+
+import java.util.ArrayList;
 import java.util.EventListener;
 import java.util.List;
 import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import neu.droid.guy.baking_app.CheckedData;
 import neu.droid.guy.baking_app.R;
 import neu.droid.guy.baking_app.model.Baking;
 import neu.droid.guy.baking_app.model.Steps;
@@ -43,33 +57,38 @@ import static neu.droid.guy.baking_app.Recipe.MainActivity.RECIPE_INTENT_KEY;
 import static neu.droid.guy.baking_app.Recipe.MainActivity.STEPS_INTENT_KEY;
 import static neu.droid.guy.baking_app.Steps.StepsAdapter.STEP_NUMBER_INTENT;
 
-// TODO: Implement Media Session
-// TODO: Handle rotation
-// TODO: progress Bar
+// TODO: Ingredients dropdown
 // TODO: Master slave view
-// TODO: Landscape mode
+
+// TODO: Implement Media Session
 // TODO: Next Video
-// TODO: checkmark watched videos
 
 
 public class Video extends AppCompatActivity implements ExoPlayer.EventListener {
+    private static final String IS_VIDEO_PLAYING = "IS_VIDEO_PLAYING";
     private List<Steps> mListOfSteps;
     private Steps mCurrentStep;
     private int mSelectedStepNumber;
     private ExoPlayer mMediaPlayer;
-    private long mSeekBarPosition;
-    private int mWindowIndex;
+    private long mSeekBarPosition = 0;
+    private int mWindowIndex = 0;
     private String mVideoUrl;
 
     @BindView(R.id.video_exoplayer_view)
     PlayerView mPlayerView;
-    @BindView(R.id.video_progress_bar)
-    ProgressBar mVideoProgressBar;
     @BindView(R.id.description_recipe)
     TextView mDescriptionTextView;
+    @BindView(R.id.video_progress_bar)
+    ProgressBar mVideoProgressBar;
 
+
+    public static final double ASPECT_RATIO_VIDEO_CONSTANT = 0.56;
     private static String WINDOW_INDEX = "WINDOW_INDEX";
     private static String SEEK_BAR_POSITION = "SEEK_BAR_POSITION";
+    private String LOG_TAG = getClass().getSimpleName();
+    private static final String SELECTED_STEP_SAVED_STATE = "SELECTED_STEP_SAVED_STATE";
+    private static final String CURRENT_STEP_OBJECT_EXTRA = "CURRENT_STEP_OBJECT_EXTRA";
+    private boolean mPlaybackState = true;
 
 
     @Override
@@ -78,45 +97,93 @@ public class Video extends AppCompatActivity implements ExoPlayer.EventListener 
         setContentView(R.layout.activity_video);
         ButterKnife.bind(this);
 
-        mVideoProgressBar.setVisibility(View.INVISIBLE);
+        resizeVideoView();
 
-        if (getIntent().hasExtra(STEPS_INTENT_KEY)) {
-            try {
-                mListOfSteps = Objects.requireNonNull(getIntent().getExtras()).getParcelableArrayList(STEPS_INTENT_KEY);
-                mSelectedStepNumber = getIntent().getExtras().getInt(STEP_NUMBER_INTENT);
-                mCurrentStep = mListOfSteps.get(mSelectedStepNumber);
-                mVideoUrl = mCurrentStep.getVideoURL();
-                if (!TextUtils.isEmpty(mVideoUrl) && mMediaPlayer == null) {
-                    initializePlayer();
-                }
-                mDescriptionTextView.setText(mCurrentStep.getDescription());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        } else {
-            //TODO: Create Fallback
+        if (savedInstanceState != null && mMediaPlayer == null) {
+            getDataFromSavedInstanceState(savedInstanceState);
         }
 
-        if (savedInstanceState != null) {
-            mWindowIndex = savedInstanceState.getInt(WINDOW_INDEX);
-            mSeekBarPosition = savedInstanceState.getLong(SEEK_BAR_POSITION);
+        if (getIntent().hasExtra(STEPS_INTENT_KEY) && savedInstanceState == null) {
+            Bundle extrasBundle = Objects.requireNonNull(getIntent().getExtras());
+            getDataFromIntent(extrasBundle);
+        }
+    }
+
+    private void getDataFromSavedInstanceState(Bundle savedInstanceState) {
+        mWindowIndex = savedInstanceState.getInt(WINDOW_INDEX);
+        mSeekBarPosition = savedInstanceState.getLong(SEEK_BAR_POSITION);
+        mSelectedStepNumber = savedInstanceState.getInt(SELECTED_STEP_SAVED_STATE);
+        mPlaybackState = savedInstanceState.getBoolean(IS_VIDEO_PLAYING);
+
+        setupData(savedInstanceState.<Steps>getParcelableArrayList(STEPS_INTENT_KEY),
+                (Steps) savedInstanceState.getParcelable(CURRENT_STEP_OBJECT_EXTRA));
+    }
+
+    private void getDataFromIntent(Bundle extrasBundle) {
+        try {
+            List<Steps> listOfSteps = extrasBundle.getParcelableArrayList(STEPS_INTENT_KEY);
+            int recipeNum = extrasBundle.getInt(RECIPE_INTENT_KEY);
+            mSelectedStepNumber = extrasBundle.getInt(STEP_NUMBER_INTENT);
+            CheckedData.newInstance().getStepsCompleted(recipeNum).put(mSelectedStepNumber, true);
+            setupData(listOfSteps,
+                    listOfSteps.get(mSelectedStepNumber));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    private void setupData(List<Steps> listOfSteps, Steps currentStep) {
+        mListOfSteps = listOfSteps;
+
+        //Current step object for text view and other data apart from url
+        mCurrentStep = currentStep;
+        if (mCurrentStep == null) {
+            return;
+        }
+
+        //The url for exoplayer
+        mVideoUrl = mCurrentStep.getVideoURL();
+        mDescriptionTextView.setText(mCurrentStep.getDescription());
+    }
+
+
+    private void resizeVideoView() {
+        if (this.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            hideSystemUi();
+            DisplayMetrics displayMetrics = new DisplayMetrics();
+            getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+            mPlayerView.setLayoutParams(new LinearLayout.LayoutParams(
+                    displayMetrics.widthPixels, displayMetrics.heightPixels));
         } else {
-            mSeekBarPosition = 0;
-            mWindowIndex = 0;
+            DisplayMetrics displayMetrics = new DisplayMetrics();
+            getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+            int width = displayMetrics.widthPixels;
+            double height = width * ASPECT_RATIO_VIDEO_CONSTANT;
+            mPlayerView.setLayoutParams(new LinearLayout.LayoutParams(width, (int) height));
         }
     }
 
     private void initializePlayer() {
+        if (mVideoUrl == null || TextUtils.isEmpty(mVideoUrl)) {
+            noVideoView();
+            return;
+        }
         mMediaPlayer = ExoPlayerFactory.newSimpleInstance(new DefaultRenderersFactory(Video.this),
                 new DefaultTrackSelector(),
                 new DefaultLoadControl());
 
-        mMediaPlayer.setPlayWhenReady(true);
-        mPlayerView.setPlayer(mMediaPlayer);
-        mMediaPlayer.seekTo(mWindowIndex, mSeekBarPosition);
+        mMediaPlayer.addListener(this);
 
-        if (mVideoUrl != null && !TextUtils.isEmpty(mVideoUrl)) {
+        mPlayerView.setPlayer(mMediaPlayer);
+        mMediaPlayer.setPlayWhenReady(mPlaybackState);
+
+        try {
             prepareMediaSource(Uri.parse(mVideoUrl));
+            mMediaPlayer.seekTo(mMediaPlayer.getCurrentPosition() + mSeekBarPosition);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Unable to fetch url, please try again", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -137,11 +204,12 @@ public class Video extends AppCompatActivity implements ExoPlayer.EventListener 
     @Override
     protected void onStart() {
         super.onStart();
-        if (!TextUtils.isEmpty(mVideoUrl) && Build.VERSION.SDK_INT > 23) {
-            mPlayerView.setVisibility(View.VISIBLE);
-            initializePlayer();
-        } else {
-            noVideoView();
+        if (mMediaPlayer == null) {
+            //Dont go to else condition above just because of SDK version
+            if (Build.VERSION.SDK_INT > 23) {
+                mPlayerView.setVisibility(View.VISIBLE);
+                initializePlayer();
+            }
         }
     }
 
@@ -152,17 +220,18 @@ public class Video extends AppCompatActivity implements ExoPlayer.EventListener 
     protected void onResume() {
         super.onResume();
 //        hideSystemUi();
-        if (!TextUtils.isEmpty(mVideoUrl) && Build.VERSION.SDK_INT <= 23) {
-            mPlayerView.setVisibility(View.VISIBLE);
-            mDescriptionTextView.setBackground(null);
-            mDescriptionTextView.setTextColor(getResources().getColor(R.color.black));
-            initializePlayer();
-        } else {
-            noVideoView();
+        if (mMediaPlayer == null) {
+            if (Build.VERSION.SDK_INT <= 23) {
+                mPlayerView.setVisibility(View.VISIBLE);
+                mDescriptionTextView.setBackground(null);
+                mDescriptionTextView.setTextColor(getResources().getColor(R.color.black));
+                initializePlayer();
+            }
         }
     }
 
     private void noVideoView() {
+        mVideoProgressBar.setVisibility(View.INVISIBLE);
         mPlayerView.setVisibility(View.GONE);
         mDescriptionTextView.setBackground(getResources().getDrawable(R.drawable.rectangle));
         mDescriptionTextView.setTextColor(getResources().getColor(R.color.white));
@@ -175,8 +244,10 @@ public class Video extends AppCompatActivity implements ExoPlayer.EventListener 
     @Override
     protected void onPause() {
         super.onPause();
-        if (Build.VERSION.SDK_INT <= 23) {
-            releasePlayer();
+        if (mMediaPlayer != null) {
+            // Store values to handle rotation
+            mSeekBarPosition = mMediaPlayer.getCurrentPosition();
+            mWindowIndex = mMediaPlayer.getCurrentWindowIndex();
         }
     }
 
@@ -186,16 +257,12 @@ public class Video extends AppCompatActivity implements ExoPlayer.EventListener 
     @Override
     protected void onStop() {
         super.onStop();
-        if (Build.VERSION.SDK_INT > 23) {
-            releasePlayer();
-        }
+        releasePlayer();
     }
 
     private void releasePlayer() {
         if (mMediaPlayer != null) {
-            // Store values to handle rotation
-            mSeekBarPosition = mMediaPlayer.getCurrentPosition();
-            mWindowIndex = mMediaPlayer.getCurrentWindowIndex();
+            mMediaPlayer.stop();
 
             // Release Player
             mMediaPlayer.release();
@@ -203,25 +270,88 @@ public class Video extends AppCompatActivity implements ExoPlayer.EventListener 
         }
     }
 
-    /**
-     * This is the same as {@link #onSaveInstanceState} but is called for activities
-     * created with the attribute {@link android.R.attr#persistableMode} set to
-     * <code>persistAcrossReboots</code>. The {@link PersistableBundle} passed
-     * in will be saved and presented in {@link #onCreate(Bundle, PersistableBundle)}
-     * the first time that this activity is restarted following the next device reboot.
-     *
-     * @param outState           Bundle in which to place your saved state.
-     * @param outPersistentState State which will be saved across reboots.
-     * @see #onSaveInstanceState(Bundle)
-     * @see #onCreate
-     * @see #onRestoreInstanceState(Bundle, PersistableBundle)
-     * @see #onPause
-     */
     @Override
-    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
-        super.onSaveInstanceState(outState, outPersistentState);
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
         outState.putInt(WINDOW_INDEX, mWindowIndex);
         outState.putLong(SEEK_BAR_POSITION, mSeekBarPosition);
+        outState.putParcelableArrayList(STEPS_INTENT_KEY, (ArrayList<? extends Parcelable>) mListOfSteps);
+        outState.putInt(SELECTED_STEP_SAVED_STATE, mSelectedStepNumber);
+        outState.putParcelable(CURRENT_STEP_OBJECT_EXTRA, mCurrentStep);
+        outState.putBoolean(IS_VIDEO_PLAYING, mPlaybackState);
+    }
+
+    @Override
+    public void onTimelineChanged(Timeline timeline, Object manifest, int reason) {
+
+    }
+
+    @Override
+    public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
+
+    }
+
+    @Override
+    public void onLoadingChanged(boolean isLoading) {
+
+    }
+
+
+    /**
+     * Called when the value returned from either {@link //#getPlayWhenReady()} or
+     * {@link //#getPlaybackState()} changes.
+     *
+     * @param playWhenReady Whether playback will proceed when ready.
+     * @param playbackState One of the {@code STATE} constants.
+     */
+    @Override
+    public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+        switch (playbackState) {
+            case Player.STATE_READY:
+//                if (playWhenReady) // Player Playing
+                mVideoProgressBar.setVisibility(View.INVISIBLE);
+                mPlaybackState = true;
+                if (!playWhenReady) {
+                    mPlaybackState = false;
+                }
+                break;
+            case Player.STATE_BUFFERING: //Player Buffering
+                mVideoProgressBar.setVisibility(View.VISIBLE);
+                break;
+            case Player.STATE_ENDED: //Playback Ended
+                mVideoProgressBar.setVisibility(View.INVISIBLE);
+                break;
+        }
+    }
+
+    @Override
+    public void onRepeatModeChanged(int repeatMode) {
+
+    }
+
+    @Override
+    public void onShuffleModeEnabledChanged(boolean shuffleModeEnabled) {
+
+    }
+
+    @Override
+    public void onPlayerError(ExoPlaybackException error) {
+
+    }
+
+    @Override
+    public void onPositionDiscontinuity(int reason) {
+
+    }
+
+    @Override
+    public void onPlaybackParametersChanged(PlaybackParameters playbackParameters) {
+
+    }
+
+    @Override
+    public void onSeekProcessed() {
+
     }
 
     /**
@@ -236,132 +366,27 @@ public class Video extends AppCompatActivity implements ExoPlayer.EventListener 
     }
 
 
-    /**
-     * Called when the timeline and/or manifest has been refreshed.
-     * <p>
-     * Note that if the timeline has changed then a position discontinuity may also have occurred.
-     * For example, the current period index may have changed as a result of periods being added or
-     * removed from the timeline. This will <em>not</em> be reported via a separate call to
-     * {@link #onPositionDiscontinuity(int)}.
-     *
-     * @param timeline The latest timeline. Never null, but may be empty.
-     * @param manifest The latest manifest. May be null.
-     * @param reason   The {@link //TimelineChangeReason} responsible for this timeline change.
-     */
     @Override
-    public void onTimelineChanged(Timeline timeline, Object manifest, int reason) {
-
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Don't inflate menu if there is no video
+        if (mVideoUrl != null && !TextUtils.isEmpty(mVideoUrl)) {
+            getMenuInflater().inflate(R.menu.hide_ui, menu);
+            return true;
+        }
+        return false;
     }
 
-    /**
-     * Called when the available or selected tracks change.
-     *
-     * @param trackGroups     The available tracks. Never null, but may be of length zero.
-     * @param trackSelections The track selections for each renderer. Never null and always of
-     *                        length {@link //#getRendererCount()}, but may contain null elements.
-     */
     @Override
-    public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
-
-    }
-
-    /**
-     * Called when the player starts or stops loading the source.
-     *
-     * @param isLoading Whether the source is currently being loaded.
-     */
-    @Override
-    public void onLoadingChanged(boolean isLoading) {
-
-    }
-
-    /**
-     * Called when the value returned from either {@link //#getPlayWhenReady()} or
-     * {@link //#getPlaybackState()} changes.
-     *
-     * @param playWhenReady Whether playback will proceed when ready.
-     * @param playbackState One of the {@code STATE} constants.
-     */
-    @Override
-    public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-//        if (playbackState == Player.STATE_READY && playWhenReady) {
-//            // Playing
-//            mVideoProgressBar.setVisibility(View.INVISIBLE);
-//        } else if (playbackState == Player.STATE_BUFFERING) {
-//            mVideoProgressBar.setVisibility(View.VISIBLE);
-//        }
-    }
-
-    /**
-     * Called when the value of {@link #//getRepeatMode()} changes.
-     *
-     * @param repeatMode The {@link //RepeatMode} used for playback.
-     */
-    @Override
-    public void onRepeatModeChanged(int repeatMode) {
-
-    }
-
-    /**
-     * Called when the value of {@link #//getShuffleModeEnabled()} changes.
-     *
-     * @param shuffleModeEnabled Whether shuffling of windows is enabled.
-     */
-    @Override
-    public void onShuffleModeEnabledChanged(boolean shuffleModeEnabled) {
-
-    }
-
-    /**
-     * Called when an error occurs. The playback state will transition to {@link #//STATE_IDLE}
-     * immediately after this method is called. The player instance can still be used, and
-     * {@link #//release()} must still be called on the player should it no longer be required.
-     *
-     * @param error The error.
-     */
-    @Override
-    public void onPlayerError(ExoPlaybackException error) {
-
-    }
-
-    /**
-     * Called when a position discontinuity occurs without a change to the timeline. A position
-     * discontinuity occurs when the current window or period index changes (as a result of playback
-     * transitioning from one period in the timeline to the next), or when the playback position
-     * jumps within the period currently being played (as a result of a seek being performed, or
-     * when the source introduces a discontinuity internally).
-     * <p>
-     * When a position discontinuity occurs as a result of a change to the timeline this method is
-     * <em>not</em> called. {@link #onTimelineChanged(Timeline, Object, int)} is called in this
-     * case.
-     *
-     * @param reason The {@link //DiscontinuityReason} responsible for the discontinuity.
-     */
-    @Override
-    public void onPositionDiscontinuity(int reason) {
-
-    }
-
-    /**
-     * Called when the current playback parameters change. The playback parameters may change due to
-     * a call to {@link #//setPlaybackParameters(PlaybackParameters)}, or the player itself may change
-     * them (for example, if audio playback switches to passthrough mode, where speed adjustment is
-     * no longer possible).
-     *
-     * @param playbackParameters The playback parameters.
-     */
-    @Override
-    public void onPlaybackParametersChanged(PlaybackParameters playbackParameters) {
-
-    }
-
-    /**
-     * Called when all pending seek requests have been processed by the player. This is guaranteed
-     * to happen after any necessary changes to the player state were reported to
-     * {@link #onPlayerStateChanged(boolean, int)}.
-     */
-    @Override
-    public void onSeekProcessed() {
-
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.hide_ui_button) {
+            if (this.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+                hideSystemUi();
+            } else if (this.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            }
+            return true;
+        }
+        return false;
     }
 }

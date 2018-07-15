@@ -46,7 +46,6 @@ public class ParseJson {
                         parseJsonArrayUsingGson(response.toString());
                     }
                 },
-                // TODO: Handle Error properly
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
