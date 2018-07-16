@@ -5,7 +5,14 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatSpinner;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.Spinner;
+
+import com.afollestad.materialdialogs.MaterialDialog;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,6 +22,7 @@ import java.util.Objects;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import neu.droid.guy.baking_app.CheckedData;
+import neu.droid.guy.baking_app.Ingredients.IngredientsAdapter;
 import neu.droid.guy.baking_app.R;
 import neu.droid.guy.baking_app.Video.Video;
 import neu.droid.guy.baking_app.model.Baking;
@@ -26,7 +34,10 @@ import static neu.droid.guy.baking_app.Recipe.MainActivity.RECIPE_INTENT_KEY;
 import static neu.droid.guy.baking_app.Recipe.MainActivity.STEPS_INTENT_KEY;
 import static neu.droid.guy.baking_app.Steps.StepsAdapter.STEP_NUMBER_INTENT;
 
-public class StepsView extends AppCompatActivity implements StepsAdapter.getSelectedStepIndex {
+public class StepsView extends AppCompatActivity
+        implements StepsAdapter.getSelectedStepIndex {
+
+
     private static final String RECIPE_NAME = "RECIPE_NAME";
     public static final String CURRENT_RECIPE_ID = "CURRENT_RECIPE_ID";
     private List<Steps> mStepsList;
@@ -34,9 +45,10 @@ public class StepsView extends AppCompatActivity implements StepsAdapter.getSele
     private String mRecipeName;
     private int mBakingId;
     private StepsViewFragment stepsFragment;
+    private MaterialDialog materialDialog;
 
-    @BindView(R.id.ingredients_spinner)
-    AppCompatSpinner mIngredientsSpinner;
+    @BindView(R.id.ingredients_button)
+    Button mShowIngredientsButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,7 +58,6 @@ public class StepsView extends AppCompatActivity implements StepsAdapter.getSele
 
         // Handle Rotation
         checkSavedInstanceState(savedInstanceState);
-
 
         if (getIntent().hasExtra(RECIPE_INTENT_KEY) && mStepsList == null) {
             try {
@@ -65,6 +76,26 @@ public class StepsView extends AppCompatActivity implements StepsAdapter.getSele
         fallbackArrays();
         initFragment();
         initIngredientsDropDown();
+
+        mShowIngredientsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                displayIngredients();
+            }
+        });
+    }
+
+    private void displayIngredients() {
+
+        LinearLayoutManager recyclerViewManager = new LinearLayoutManager(StepsView.this);
+        recyclerViewManager.setOrientation(LinearLayoutManager.VERTICAL);
+
+        materialDialog = new MaterialDialog.Builder(StepsView.this)
+                .title("Ingredients for recipe")
+                .adapter(new IngredientsAdapter(mIngredientsList, StepsView.this), recyclerViewManager)
+                .build();
+
+        materialDialog.show();
     }
 
 

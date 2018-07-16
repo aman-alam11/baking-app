@@ -12,8 +12,12 @@
         android:layout_height="wrap_content"
         app:cardElevation="20dp">
 
-        <android.support.v7.widget.AppCompatSpinner
-            android:id="@+id/ingredients_spinner"
+        <Button
+            android:background="@color/black"
+            android:textColor="@color/colorAccent"
+            android:text="Show Ingredients"
+            android:layout_margin="10dp"
+            android:id="@+id/ingredients_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
