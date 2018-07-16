@@ -20,15 +20,15 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import neu.droid.guy.baking_app.Utils.getSelectedItemIndex;
 import neu.droid.guy.baking_app.model.Baking;
 import neu.droid.guy.baking_app.model.Steps;
 import neu.droid.guy.baking_app.R;
 
-import static neu.droid.guy.baking_app.Recipe.MainActivity.RECIPE_INTENT_KEY;
-import static neu.droid.guy.baking_app.Recipe.MainActivity.STEPS_INTENT_KEY;
-import static neu.droid.guy.baking_app.Steps.StepsView.CURRENT_RECIPE_ID;
+import static neu.droid.guy.baking_app.Utils.Constants.CURRENT_RECIPE_ID;
+import static neu.droid.guy.baking_app.Utils.Constants.STEPS_INTENT_KEY;
 
-public class StepsViewFragment extends Fragment{
+public class StepsViewFragment extends Fragment {
     private List<Steps> mListOfSteps;
     private int mCurrentRecipeId;
     private StepsAdapter mStepsAdapter;
@@ -89,9 +89,11 @@ public class StepsViewFragment extends Fragment{
             recyclerViewManager.setOrientation(LinearLayoutManager.VERTICAL);
             mStepsRV.setLayoutManager(recyclerViewManager);
             // Init Adapter
-            mStepsAdapter = new StepsAdapter(mListOfSteps,
-                    (StepsAdapter.getSelectedStepIndex) context,
-                    context, mCurrentRecipeId);
+            mStepsAdapter =
+                    new StepsAdapter(mListOfSteps,
+                            (getSelectedItemIndex) context,
+                            context,
+                            mCurrentRecipeId);
             // Set Adapter on Recycler View
             mStepsRV.setAdapter(mStepsAdapter);
         }

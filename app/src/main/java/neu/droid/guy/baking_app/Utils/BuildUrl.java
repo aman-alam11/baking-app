@@ -1,8 +1,6 @@
-package neu.droid.guy.baking_app.NetworkingUtils;
+package neu.droid.guy.baking_app.Utils;
 
 import android.net.Uri;
-
-import java.net.URL;
 
 public class BuildUrl {
 //https://d17h27t6h515a5.cloudfront.net/topher/2017/May/59121517_baking/baking.json

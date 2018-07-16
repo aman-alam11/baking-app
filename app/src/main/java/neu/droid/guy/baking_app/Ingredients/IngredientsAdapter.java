@@ -10,14 +10,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.HashMap;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import neu.droid.guy.baking_app.R;
+import neu.droid.guy.baking_app.Utils.CheckedData;
+import neu.droid.guy.baking_app.Utils.getSelectedItemIndex;
 import neu.droid.guy.baking_app.model.Ingredients;
 
 public class IngredientsAdapter extends
@@ -25,10 +29,14 @@ public class IngredientsAdapter extends
 
     private List<Ingredients> mListOfIngredients;
     private Context mContext;
+    private int mRecipeNumber;
 
-    public IngredientsAdapter(List<Ingredients> ingredientsList, Context context) {
+    public IngredientsAdapter(List<Ingredients> ingredientsList,
+                              Context context,
+                              int recipeNumberSelected) {
         mListOfIngredients = ingredientsList;
         mContext = context;
+        mRecipeNumber = recipeNumberSelected;
     }
 
     /**
@@ -64,6 +72,17 @@ public class IngredientsAdapter extends
         String measureQty = mListOfIngredients.get(position).getQuantity() + " " +
                 mListOfIngredients.get(position).getMeasure();
         holder.bindViewsIngredients(mListOfIngredients.get(position).getIngredient(), measureQty);
+        if (checkListForSelected(position)) {
+            holder.isIngredientAdded.setChecked(true);
+        }
+    }
+
+    Boolean checkListForSelected(int position) {
+        Boolean isChecked = (Boolean) CheckedData.getInstance().getIngredientsCompleted(mRecipeNumber).get(position);
+        if (isChecked == null || !isChecked) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -92,6 +111,7 @@ public class IngredientsAdapter extends
         ViewRecipeViewHolder(final View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
+
             rootCardView.setOnClickListener(new View.OnClickListener() {
 
                 /**
@@ -103,9 +123,14 @@ public class IngredientsAdapter extends
                 public void onClick(View v) {
                     if (isIngredientAdded.isChecked())
                         isIngredientAdded.setChecked(false);
-                    else isIngredientAdded.setChecked(true);
+                    else {
+                        isIngredientAdded.setChecked(true);
+                    }
+
+                    updateStaticList(getAdapterPosition());
                 }
             });
+
         }
 
         /**
@@ -139,6 +164,34 @@ public class IngredientsAdapter extends
             ingredientNameTextView.setTextColor(colorText);
             measureQuantityTextView.setTextColor(colorText);
         }
+
+        /**
+         * Formulate various cases based on
+         *
+         * @param adapterPosition The position clicked on
+         */
+        private void updateStaticList(int adapterPosition) {
+            HashMap<Integer, Boolean> localMap = CheckedData.getInstance().getIngredientsCompleted(mRecipeNumber);
+            if (localMap.get(getAdapterPosition()) == null) {
+                updateDataHelper(adapterPosition, true);
+            } else if (localMap.get(getAdapterPosition())) {
+                updateDataHelper(adapterPosition, false);
+            } else {
+                updateDataHelper(adapterPosition, true);
+            }
+        }
+
+        /**
+         * Update CheckedList
+         *
+         * @param adapterPos The position clicked on
+         * @param pref       The preference to update in static list based on if the checked box is clicked or not
+         */
+        void updateDataHelper(int adapterPos, Boolean pref) {
+            CheckedData.getInstance().getIngredientsCompleted(mRecipeNumber).put(adapterPos, pref);
+        }
+
+
     }
 
 

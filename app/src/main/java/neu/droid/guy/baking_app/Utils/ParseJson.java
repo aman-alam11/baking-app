@@ -1,10 +1,7 @@
-package neu.droid.guy.baking_app.NetworkingUtils;
+package neu.droid.guy.baking_app.Utils;
 //https://futurestud.io/tutorials/gson-mapping-of-arrays-and-lists-of-objects
 
 import android.content.Context;
-import android.content.DialogInterface;
-import android.os.Build;
-import android.support.v7.app.AlertDialog;
 import android.util.Log;
 
 import com.android.volley.Request;

@@ -1,12 +1,9 @@
 package neu.droid.guy.baking_app.Recipe;
 
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.design.widget.Snackbar;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -20,27 +17,24 @@ import com.android.volley.Cache;
 import com.android.volley.RequestQueue;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import neu.droid.guy.baking_app.NetworkingUtils.BuildUrl;
-import neu.droid.guy.baking_app.NetworkingUtils.ErrorListener;
-import neu.droid.guy.baking_app.NetworkingUtils.ParseJson;
-import neu.droid.guy.baking_app.NetworkingUtils.VolleyNetworkQueue;
+import neu.droid.guy.baking_app.Utils.BuildUrl;
+import neu.droid.guy.baking_app.Utils.ErrorListener;
+import neu.droid.guy.baking_app.Utils.ParseJson;
+import neu.droid.guy.baking_app.Utils.VolleyNetworkQueue;
 import neu.droid.guy.baking_app.model.Baking;
 import neu.droid.guy.baking_app.R;
 import neu.droid.guy.baking_app.Steps.StepsView;
+
+import static neu.droid.guy.baking_app.Utils.Constants.RECIPE_INTENT_KEY;
 
 public class MainActivity extends AppCompatActivity implements ParseJson.getJsonResponseAsync,
         SelectRecipeAdapter.ItemClickListener, ErrorListener {
 
     private SelectRecipeAdapter mRecipeAdapter;
-    public static final String INGREDIENTS_INTENT_KEY = "INGREDIENTS_INTENT_KEY";
-    public static final String STEPS_INTENT_KEY = "STEPS_INTENT_KEY";
-    public static final String RECIPE_INTENT_KEY = "RECIPE_INTENT_KEY";
-
     private final String LOG_TAG = this.getClass().getSimpleName();
     List<Baking> mLocalBakingList = new ArrayList<>();
     private boolean isDataAvailable;

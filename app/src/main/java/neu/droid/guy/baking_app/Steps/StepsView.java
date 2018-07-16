@@ -4,48 +4,45 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.AppCompatSpinner;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import neu.droid.guy.baking_app.CheckedData;
+import neu.droid.guy.baking_app.Utils.CheckedData;
 import neu.droid.guy.baking_app.Ingredients.IngredientsAdapter;
 import neu.droid.guy.baking_app.R;
+import neu.droid.guy.baking_app.Utils.getSelectedItemIndex;
 import neu.droid.guy.baking_app.Video.Video;
 import neu.droid.guy.baking_app.model.Baking;
 import neu.droid.guy.baking_app.model.Ingredients;
 import neu.droid.guy.baking_app.model.Steps;
 
-import static neu.droid.guy.baking_app.Recipe.MainActivity.INGREDIENTS_INTENT_KEY;
-import static neu.droid.guy.baking_app.Recipe.MainActivity.RECIPE_INTENT_KEY;
-import static neu.droid.guy.baking_app.Recipe.MainActivity.STEPS_INTENT_KEY;
-import static neu.droid.guy.baking_app.Steps.StepsAdapter.STEP_NUMBER_INTENT;
+import static neu.droid.guy.baking_app.Utils.Constants.CURRENT_RECIPE_ID;
+import static neu.droid.guy.baking_app.Utils.Constants.INGREDIENTS_INTENT_KEY;
+import static neu.droid.guy.baking_app.Utils.Constants.RECIPE_INTENT_KEY;
+import static neu.droid.guy.baking_app.Utils.Constants.RECIPE_NAME;
+import static neu.droid.guy.baking_app.Utils.Constants.STEPS_INTENT_KEY;
+import static neu.droid.guy.baking_app.Utils.Constants.STEP_NUMBER_INTENT;
 
 public class StepsView extends AppCompatActivity
-        implements StepsAdapter.getSelectedStepIndex {
+        implements getSelectedItemIndex {
 
 
-    private static final String RECIPE_NAME = "RECIPE_NAME";
-    public static final String CURRENT_RECIPE_ID = "CURRENT_RECIPE_ID";
     private List<Steps> mStepsList;
     private List<Ingredients> mIngredientsList;
     private String mRecipeName;
     private int mBakingId;
     private StepsViewFragment stepsFragment;
-    private MaterialDialog materialDialog;
 
     @BindView(R.id.ingredients_button)
     Button mShowIngredientsButton;
@@ -62,6 +59,7 @@ public class StepsView extends AppCompatActivity
         if (getIntent().hasExtra(RECIPE_INTENT_KEY) && mStepsList == null) {
             try {
                 Baking mSelectedRecipe = (Baking) Objects.requireNonNull(getIntent().getExtras()).get(RECIPE_INTENT_KEY);
+                assert mSelectedRecipe != null;
                 mBakingId = mSelectedRecipe.getId();
                 mStepsList = Objects.requireNonNull(mSelectedRecipe).getSteps();
                 mIngredientsList = mSelectedRecipe.getIngredients();
@@ -75,8 +73,6 @@ public class StepsView extends AppCompatActivity
 
         fallbackArrays();
         initFragment();
-        initIngredientsDropDown();
-
         mShowIngredientsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -85,14 +81,19 @@ public class StepsView extends AppCompatActivity
         });
     }
 
-    private void displayIngredients() {
 
+    /**
+     * Set the recycler view in Material Dialog
+     */
+    private void displayIngredients() {
         LinearLayoutManager recyclerViewManager = new LinearLayoutManager(StepsView.this);
         recyclerViewManager.setOrientation(LinearLayoutManager.VERTICAL);
 
-        materialDialog = new MaterialDialog.Builder(StepsView.this)
-                .title("Ingredients for recipe")
-                .adapter(new IngredientsAdapter(mIngredientsList, StepsView.this), recyclerViewManager)
+        MaterialDialog materialDialog = new MaterialDialog.Builder(StepsView.this)
+                .title(R.string.ingredients_dialog_title)
+                .adapter(
+                        new IngredientsAdapter(mIngredientsList, StepsView.this, mBakingId),
+                        recyclerViewManager)
                 .build();
 
         materialDialog.show();
@@ -112,7 +113,6 @@ public class StepsView extends AppCompatActivity
      * Retrieve data from saved state bundle in case of rotation
      *
      * @param savedInstanceState The bundle where data is saved
-     * @return
      */
     private void checkSavedInstanceState(Bundle savedInstanceState) {
         if (savedInstanceState == null) {
@@ -126,23 +126,19 @@ public class StepsView extends AppCompatActivity
         mBakingId = savedInstanceState.getInt(CURRENT_RECIPE_ID);
     }
 
-    /**
-     * Handle clicks on ingredients drop down
-     */
-    private void initIngredientsDropDown() {
-
-    }
 
     /**
      * @param index position of step selected
      */
     @Override
     public void selectedStepPosition(int index) {
+        Toast.makeText(this, "selectedStepPosition", Toast.LENGTH_SHORT).show();
+
         Intent showVideo = new Intent(this, Video.class);
         showVideo.putParcelableArrayListExtra(STEPS_INTENT_KEY, (ArrayList<? extends Parcelable>) mStepsList);
         showVideo.putExtra(STEP_NUMBER_INTENT, index);
         showVideo.putExtra(RECIPE_INTENT_KEY, mBakingId);
-        CheckedData.newInstance().getStepsCompleted(mBakingId).put(index, true);
+        CheckedData.getInstance().getStepsCompleted(mBakingId).put(index, true);
         stepsFragment.updateSelectedItem(index);
         startActivity(showVideo);
 
@@ -183,5 +179,4 @@ public class StepsView extends AppCompatActivity
             mIngredientsList = new ArrayList<>();
         }
     }
-
 }

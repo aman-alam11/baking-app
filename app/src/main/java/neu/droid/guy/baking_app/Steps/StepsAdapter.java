@@ -1,8 +1,6 @@
 package neu.droid.guy.baking_app.Steps;
 
 import android.content.Context;
-import android.content.Intent;
-import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
@@ -14,33 +12,26 @@ import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import neu.droid.guy.baking_app.CheckedData;
-import neu.droid.guy.baking_app.Video.Video;
-import neu.droid.guy.baking_app.model.Baking;
+import neu.droid.guy.baking_app.Utils.CheckedData;
+import neu.droid.guy.baking_app.Utils.getSelectedItemIndex;
 import neu.droid.guy.baking_app.model.Steps;
 import neu.droid.guy.baking_app.R;
-
-import static neu.droid.guy.baking_app.Recipe.MainActivity.RECIPE_INTENT_KEY;
 
 public class StepsAdapter extends RecyclerView.Adapter<StepsAdapter.StepsViewHolder> {
     private List<Steps> mListOfSteps;
     private Context mContext;
-    public static String STEP_NUMBER_INTENT = "STEP_NUMBER_INTENT";
-    private getSelectedStepIndex mSelectedStepInterface;
+    private getSelectedItemIndex mSelectedStepInterface;
     private Integer mRecipeId;
 
     StepsAdapter(List<Steps> listOfSteps,
-                 getSelectedStepIndex selectedIndexInterface,
+                 getSelectedItemIndex selectedIndexInterface,
                  Context context,
                  Integer currentRecipeId) {
         mListOfSteps = listOfSteps;
@@ -49,9 +40,6 @@ public class StepsAdapter extends RecyclerView.Adapter<StepsAdapter.StepsViewHol
         mRecipeId = currentRecipeId;
     }
 
-    public interface getSelectedStepIndex {
-        void selectedStepPosition(int index);
-    }
 
     /**
      * Called when RecyclerView needs a new {@link StepsViewHolder} of the given type to represent
@@ -107,7 +95,7 @@ public class StepsAdapter extends RecyclerView.Adapter<StepsAdapter.StepsViewHol
         if (TextUtils.isEmpty(mListOfSteps.get(position).getVideoURL())) {
             holder.mIconImageView.setImageDrawable(mContext.getResources().getDrawable(R.drawable.cookingpan24));
         }
-        Boolean isStepCompleted = (Boolean) CheckedData.newInstance().getStepsCompleted(mRecipeId).get(position);
+        Boolean isStepCompleted = (Boolean) CheckedData.getInstance().getStepsCompleted(mRecipeId).get(position);
         if (isStepCompleted != null) {
             holder.mStepsCheckBox.setChecked(isStepCompleted);
         }
@@ -154,8 +142,8 @@ public class StepsAdapter extends RecyclerView.Adapter<StepsAdapter.StepsViewHol
          */
         @Override
         public void onClick(View v) {
-            if (CheckedData.newInstance().getStepsCompleted(mRecipeId).get(getAdapterPosition()) != null) {
-                mStepsCheckBox.setChecked((Boolean) CheckedData.newInstance().getStepsCompleted(mRecipeId).get(getAdapterPosition()));
+            if (CheckedData.getInstance().getStepsCompleted(mRecipeId).get(getAdapterPosition()) != null) {
+                mStepsCheckBox.setChecked((Boolean) CheckedData.getInstance().getStepsCompleted(mRecipeId).get(getAdapterPosition()));
             }
             mSelectedStepInterface.selectedStepPosition(getAdapterPosition());
         }

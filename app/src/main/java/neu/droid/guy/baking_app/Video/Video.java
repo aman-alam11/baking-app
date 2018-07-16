@@ -2,20 +2,16 @@ package neu.droid.guy.baking_app.Video;
 
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Parcelable;
-import android.os.PersistableBundle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -28,7 +24,6 @@ import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
-import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
@@ -36,36 +31,35 @@ import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.ui.PlayerView;
-import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 
-import org.w3c.dom.Text;
-
 import java.util.ArrayList;
-import java.util.EventListener;
 import java.util.List;
 import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import neu.droid.guy.baking_app.CheckedData;
+import neu.droid.guy.baking_app.Utils.CheckedData;
 import neu.droid.guy.baking_app.R;
-import neu.droid.guy.baking_app.model.Baking;
 import neu.droid.guy.baking_app.model.Steps;
 
-import static neu.droid.guy.baking_app.Recipe.MainActivity.RECIPE_INTENT_KEY;
-import static neu.droid.guy.baking_app.Recipe.MainActivity.STEPS_INTENT_KEY;
-import static neu.droid.guy.baking_app.Steps.StepsAdapter.STEP_NUMBER_INTENT;
+import static neu.droid.guy.baking_app.Utils.Constants.ASPECT_RATIO_VIDEO_CONSTANT;
+import static neu.droid.guy.baking_app.Utils.Constants.CURRENT_STEP_OBJECT_EXTRA;
+import static neu.droid.guy.baking_app.Utils.Constants.IS_VIDEO_PLAYING;
+import static neu.droid.guy.baking_app.Utils.Constants.RECIPE_INTENT_KEY;
+import static neu.droid.guy.baking_app.Utils.Constants.SEEK_BAR_POSITION;
+import static neu.droid.guy.baking_app.Utils.Constants.SELECTED_STEP_SAVED_STATE;
+import static neu.droid.guy.baking_app.Utils.Constants.STEPS_INTENT_KEY;
+import static neu.droid.guy.baking_app.Utils.Constants.STEP_NUMBER_INTENT;
+import static neu.droid.guy.baking_app.Utils.Constants.WINDOW_INDEX;
 
-// TODO: Ingredients dropdown
 // TODO: Master slave view
-
 // TODO: Implement Media Session
 // TODO: Next Video
+// TODO: handle Material Dialog Rotation and clicks
 
 
 public class Video extends AppCompatActivity implements ExoPlayer.EventListener {
-    private static final String IS_VIDEO_PLAYING = "IS_VIDEO_PLAYING";
     private List<Steps> mListOfSteps;
     private Steps mCurrentStep;
     private int mSelectedStepNumber;
@@ -81,13 +75,8 @@ public class Video extends AppCompatActivity implements ExoPlayer.EventListener 
     @BindView(R.id.video_progress_bar)
     ProgressBar mVideoProgressBar;
 
-
-    public static final double ASPECT_RATIO_VIDEO_CONSTANT = 0.56;
-    private static String WINDOW_INDEX = "WINDOW_INDEX";
-    private static String SEEK_BAR_POSITION = "SEEK_BAR_POSITION";
     private String LOG_TAG = getClass().getSimpleName();
-    private static final String SELECTED_STEP_SAVED_STATE = "SELECTED_STEP_SAVED_STATE";
-    private static final String CURRENT_STEP_OBJECT_EXTRA = "CURRENT_STEP_OBJECT_EXTRA";
+
     private boolean mPlaybackState = true;
 
 
@@ -124,7 +113,7 @@ public class Video extends AppCompatActivity implements ExoPlayer.EventListener 
             List<Steps> listOfSteps = extrasBundle.getParcelableArrayList(STEPS_INTENT_KEY);
             int recipeNum = extrasBundle.getInt(RECIPE_INTENT_KEY);
             mSelectedStepNumber = extrasBundle.getInt(STEP_NUMBER_INTENT);
-            CheckedData.newInstance().getStepsCompleted(recipeNum).put(mSelectedStepNumber, true);
+            CheckedData.getInstance().getStepsCompleted(recipeNum).put(mSelectedStepNumber, true);
             setupData(listOfSteps,
                     listOfSteps.get(mSelectedStepNumber));
         } catch (Exception e) {
@@ -219,7 +208,6 @@ public class Video extends AppCompatActivity implements ExoPlayer.EventListener 
     @Override
     protected void onResume() {
         super.onResume();
-//        hideSystemUi();
         if (mMediaPlayer == null) {
             if (Build.VERSION.SDK_INT <= 23) {
                 mPlayerView.setVisibility(View.VISIBLE);
@@ -311,6 +299,7 @@ public class Video extends AppCompatActivity implements ExoPlayer.EventListener 
 //                if (playWhenReady) // Player Playing
                 mVideoProgressBar.setVisibility(View.INVISIBLE);
                 mPlaybackState = true;
+                mPlayerView.setEnabled(false);
                 if (!playWhenReady) {
                     mPlaybackState = false;
                 }
@@ -380,8 +369,8 @@ public class Video extends AppCompatActivity implements ExoPlayer.EventListener 
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.hide_ui_button) {
             if (this.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
                 hideSystemUi();
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
             } else if (this.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
             }

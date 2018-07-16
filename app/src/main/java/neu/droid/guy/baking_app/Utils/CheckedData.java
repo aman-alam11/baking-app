@@ -1,4 +1,4 @@
-package neu.droid.guy.baking_app;
+package neu.droid.guy.baking_app.Utils;
 
 import java.util.HashMap;
 
@@ -14,7 +14,7 @@ public class CheckedData {
     }
 
 
-    public static CheckedData newInstance() {
+    public static CheckedData getInstance() {
         if (checkedDataInstance == null) {
             checkedDataInstance = new CheckedData();
         }
