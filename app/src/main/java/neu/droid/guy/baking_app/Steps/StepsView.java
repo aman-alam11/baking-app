@@ -132,8 +132,6 @@ public class StepsView extends AppCompatActivity
      */
     @Override
     public void selectedStepPosition(int index) {
-        Toast.makeText(this, "selectedStepPosition", Toast.LENGTH_SHORT).show();
-
         Intent showVideo = new Intent(this, Video.class);
         showVideo.putParcelableArrayListExtra(STEPS_INTENT_KEY, (ArrayList<? extends Parcelable>) mStepsList);
         showVideo.putExtra(STEP_NUMBER_INTENT, index);

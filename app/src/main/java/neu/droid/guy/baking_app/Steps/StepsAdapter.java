@@ -118,7 +118,7 @@ public class StepsAdapter extends RecyclerView.Adapter<StepsAdapter.StepsViewHol
     /**
      * View Holder
      */
-    class StepsViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public class StepsViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         @BindView(R.id.step_short_description)
         TextView mStepsDescTextView;
         @BindView(R.id.icon_image_view)

@@ -32,6 +32,7 @@ public class StepsViewFragment extends Fragment {
     private List<Steps> mListOfSteps;
     private int mCurrentRecipeId;
     private StepsAdapter mStepsAdapter;
+    private int mHolder = 0;
 
     public StepsViewFragment() {
     }
@@ -88,20 +89,24 @@ public class StepsViewFragment extends Fragment {
             LinearLayoutManager recyclerViewManager = new LinearLayoutManager(context);
             recyclerViewManager.setOrientation(LinearLayoutManager.VERTICAL);
             mStepsRV.setLayoutManager(recyclerViewManager);
+
             // Init Adapter
             mStepsAdapter =
                     new StepsAdapter(mListOfSteps,
                             (getSelectedItemIndex) context,
                             context,
                             mCurrentRecipeId);
+
             // Set Adapter on Recycler View
             mStepsRV.setAdapter(mStepsAdapter);
+
         }
         return rootView;
     }
 
 
     public void updateSelectedItem(int position) {
+        mHolder = position;
         mStepsAdapter.notifyItemChanged(position);
     }
 }

@@ -5,10 +5,13 @@ import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Parcelable;
+import android.support.design.widget.FloatingActionButton;
+import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,6 +28,7 @@ import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.Timeline;
+import com.google.android.exoplayer2.source.ConcatenatingMediaSource;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.TrackGroupArray;
@@ -33,6 +37,9 @@ import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 
+import org.w3c.dom.Text;
+
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -55,11 +62,10 @@ import static neu.droid.guy.baking_app.Utils.Constants.WINDOW_INDEX;
 
 // TODO: Master slave view
 // TODO: Implement Media Session
-// TODO: Next Video
-// TODO: handle Material Dialog Rotation and clicks
 
 
 public class Video extends AppCompatActivity implements ExoPlayer.EventListener {
+    private static boolean FLAG_UPDATE_ARRAY = false;
     private List<Steps> mListOfSteps;
     private Steps mCurrentStep;
     private int mSelectedStepNumber;
@@ -67,6 +73,8 @@ public class Video extends AppCompatActivity implements ExoPlayer.EventListener 
     private long mSeekBarPosition = 0;
     private int mWindowIndex = 0;
     private String mVideoUrl;
+    private boolean mPlaybackState = true;
+    private List<String> mListOfUrls = new ArrayList<>();
 
     @BindView(R.id.video_exoplayer_view)
     PlayerView mPlayerView;
@@ -74,11 +82,8 @@ public class Video extends AppCompatActivity implements ExoPlayer.EventListener 
     TextView mDescriptionTextView;
     @BindView(R.id.video_progress_bar)
     ProgressBar mVideoProgressBar;
-
-    private String LOG_TAG = getClass().getSimpleName();
-
-    private boolean mPlaybackState = true;
-
+    @BindView(R.id.next_vid_fab)
+    FloatingActionButton mNextVideoButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,7 +91,6 @@ public class Video extends AppCompatActivity implements ExoPlayer.EventListener 
         setContentView(R.layout.activity_video);
         ButterKnife.bind(this);
 
-        resizeVideoView();
 
         if (savedInstanceState != null && mMediaPlayer == null) {
             getDataFromSavedInstanceState(savedInstanceState);
@@ -96,8 +100,15 @@ public class Video extends AppCompatActivity implements ExoPlayer.EventListener 
             Bundle extrasBundle = Objects.requireNonNull(getIntent().getExtras());
             getDataFromIntent(extrasBundle);
         }
+
     }
 
+
+    /**
+     * Restores the state of activity on rotation if any
+     *
+     * @param savedInstanceState The instance state to restore activity from
+     */
     private void getDataFromSavedInstanceState(Bundle savedInstanceState) {
         mWindowIndex = savedInstanceState.getInt(WINDOW_INDEX);
         mSeekBarPosition = savedInstanceState.getLong(SEEK_BAR_POSITION);
@@ -122,7 +133,16 @@ public class Video extends AppCompatActivity implements ExoPlayer.EventListener 
     }
 
 
-    private void setupData(List<Steps> listOfSteps, Steps currentStep) {
+    /**
+     * Sets up data which are used in multiple methods in the activity
+     * This data can either be from the intent which created the activity or
+     * from saved instance state in case of rotation
+     *
+     * @param listOfSteps The List<Steps> required for next and previous videos and data
+     * @param currentStep The current step object for current activity which has
+     *                    videoUrl and videoDescription
+     */
+    private void setupData(final List<Steps> listOfSteps, Steps currentStep) {
         mListOfSteps = listOfSteps;
 
         //Current step object for text view and other data apart from url
@@ -131,12 +151,28 @@ public class Video extends AppCompatActivity implements ExoPlayer.EventListener 
             return;
         }
 
-        //The url for exoplayer
+        // Extract All urls after current step and append it to media source
+        generateListOfUrls();
+
+        //The url for exo-player
         mVideoUrl = mCurrentStep.getVideoURL();
         mDescriptionTextView.setText(mCurrentStep.getDescription());
     }
 
+    private void generateListOfUrls() {
+        int currentVideoId = mCurrentStep.getId();
+        mListOfUrls.clear();
+        for (int i = currentVideoId; i < mListOfSteps.size(); i++) {
+            mListOfUrls.add(mListOfSteps.get(i).getVideoURL());
+        }
+        FLAG_UPDATE_ARRAY = true;
+    }
 
+
+    /**
+     * Resize VideoPlayerUI whne activity starts to get a correct 16:9 aspect ratio
+     * Also called in case of rotation
+     */
     private void resizeVideoView() {
         if (this.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
             hideSystemUi();
@@ -153,6 +189,9 @@ public class Video extends AppCompatActivity implements ExoPlayer.EventListener 
         }
     }
 
+    /**
+     * Initialize ExoPlayer
+     */
     private void initializePlayer() {
         if (mVideoUrl == null || TextUtils.isEmpty(mVideoUrl)) {
             noVideoView();
@@ -167,8 +206,18 @@ public class Video extends AppCompatActivity implements ExoPlayer.EventListener 
         mPlayerView.setPlayer(mMediaPlayer);
         mMediaPlayer.setPlayWhenReady(mPlaybackState);
 
+        // Build a concatenating Media Source here
+        MediaSource[] mediaSources = new MediaSource[mListOfUrls.size()];
+
         try {
-            prepareMediaSource(Uri.parse(mVideoUrl));
+            for (int i = 0; i < mediaSources.length; i++) {
+                mediaSources[i] = extractMediaSource(Uri.parse(mListOfUrls.get(i)));
+            }
+            if (mediaSources.length == 1) {
+                prepareMediaSources(mediaSources[0]);
+            } else {
+                prepareMediaSources(new ConcatenatingMediaSource(mediaSources));
+            }
             mMediaPlayer.seekTo(mMediaPlayer.getCurrentPosition() + mSeekBarPosition);
         } catch (Exception e) {
             e.printStackTrace();
@@ -177,10 +226,21 @@ public class Video extends AppCompatActivity implements ExoPlayer.EventListener 
     }
 
 
-    void prepareMediaSource(Uri uri) {
-        mMediaPlayer.prepare(extractMediaSource(uri), true, false);
+    /**
+     * Prepare the media source using the video url
+     *
+     * @param mediaSource The media source to play
+     */
+    void prepareMediaSources(MediaSource mediaSource) {
+        mMediaPlayer.prepare(mediaSource, true, false);
     }
 
+    /**
+     * Create the actual media source using the URI
+     *
+     * @param uri The video link
+     * @return The MediaSource
+     */
     private MediaSource extractMediaSource(Uri uri) {
         return new ExtractorMediaSource
                 .Factory(new DefaultHttpDataSourceFactory("BakingApp"))
@@ -197,6 +257,8 @@ public class Video extends AppCompatActivity implements ExoPlayer.EventListener 
             //Dont go to else condition above just because of SDK version
             if (Build.VERSION.SDK_INT > 23) {
                 mPlayerView.setVisibility(View.VISIBLE);
+                // Detect screen size for aspect ratio of video player
+                resizeVideoView();
                 initializePlayer();
             }
         }
@@ -211,13 +273,20 @@ public class Video extends AppCompatActivity implements ExoPlayer.EventListener 
         if (mMediaPlayer == null) {
             if (Build.VERSION.SDK_INT <= 23) {
                 mPlayerView.setVisibility(View.VISIBLE);
+                // Detect screen size for aspect ratio of video player
+                resizeVideoView();
                 mDescriptionTextView.setBackground(null);
                 mDescriptionTextView.setTextColor(getResources().getColor(R.color.black));
+                mNextVideoButton.setVisibility(View.VISIBLE);
                 initializePlayer();
             }
         }
     }
 
+
+    /**
+     * In case there is no video, hide the ExoPlayer's UI
+     */
     private void noVideoView() {
         mVideoProgressBar.setVisibility(View.INVISIBLE);
         mPlayerView.setVisibility(View.GONE);
@@ -248,6 +317,10 @@ public class Video extends AppCompatActivity implements ExoPlayer.EventListener 
         releasePlayer();
     }
 
+
+    /**
+     * Appropriately release the MediaPlayer in case of lifecycle event
+     */
     private void releasePlayer() {
         if (mMediaPlayer != null) {
             mMediaPlayer.stop();
@@ -258,6 +331,12 @@ public class Video extends AppCompatActivity implements ExoPlayer.EventListener 
         }
     }
 
+
+    /**
+     * Save data to be restored in case of rotation
+     *
+     * @param outState The Bundle where data will be stored
+     */
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -311,6 +390,11 @@ public class Video extends AppCompatActivity implements ExoPlayer.EventListener 
                 mVideoProgressBar.setVisibility(View.INVISIBLE);
                 break;
         }
+
+//        if (playbackState == PlaybackStateCompat.STATE_FAST_FORWARDING) {
+//        } else if (playbackState == PlaybackStateCompat.STATE_REWINDING) {
+//        }
+
     }
 
     @Override
@@ -326,11 +410,64 @@ public class Video extends AppCompatActivity implements ExoPlayer.EventListener 
     @Override
     public void onPlayerError(ExoPlaybackException error) {
 
+        if (mCurrentStep.getId() == mListOfSteps.size() - 1) {
+            // End of List => DO Nothing
+            return;
+        }
+
+        // Prepare Media Player Again with new Data
+        reviveDataSources(mCurrentStep.getId() + 1);
+
+        // Hide Video View and Progress Bar
+        noVideoView();
+
+        // Show Next Button
+        mNextVideoButton.setVisibility(View.VISIBLE);
+
+        // Release Media Player
+        releasePlayer();
+
+        mNextVideoButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Hide the next button
+                if (!TextUtils.isEmpty(mListOfSteps.get(mCurrentStep.getId() + 1).getVideoURL())) {
+                    mNextVideoButton.setVisibility(View.INVISIBLE);
+                }
+
+                // Update All object's index
+                reviveDataSources(mCurrentStep.getId() + 1);
+                // Update URLs
+                generateListOfUrls();
+
+                //Unhide Video View
+                mPlayerView.setVisibility(View.VISIBLE);
+
+                //Initialize Player
+                initializePlayer();
+            }
+        });
+    }
+
+    private void reviveDataSources(int id) {
+        // Update All objects
+        mCurrentStep = mListOfSteps.get(id);
+        mVideoUrl = mCurrentStep.getVideoURL();
+        mDescriptionTextView.setText(mCurrentStep.getDescription());
     }
 
     @Override
     public void onPositionDiscontinuity(int reason) {
-
+        if (FLAG_UPDATE_ARRAY) {
+            FLAG_UPDATE_ARRAY = false;
+            return;
+        }
+        int index = mListOfSteps.size() - mListOfUrls.size() + mMediaPlayer.getCurrentWindowIndex();
+        if (index < 0 || index > mListOfSteps.size()) {
+            return;
+        }
+        mCurrentStep = mListOfSteps.get(index);
+        mDescriptionTextView.setText(mCurrentStep.getDescription());
     }
 
     @Override
@@ -345,6 +482,7 @@ public class Video extends AppCompatActivity implements ExoPlayer.EventListener 
 
     /**
      * https://codelabs.developers.google.com/codelabs/exoplayer-intro/#2
+     * Hide ths system UI for full screen playback
      */
     private void hideSystemUi() {
         mPlayerView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
@@ -355,6 +493,12 @@ public class Video extends AppCompatActivity implements ExoPlayer.EventListener 
     }
 
 
+    /**
+     * Inflate the menu
+     *
+     * @param menu
+     * @return
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Don't inflate menu if there is no video
@@ -365,6 +509,10 @@ public class Video extends AppCompatActivity implements ExoPlayer.EventListener 
         return false;
     }
 
+
+    /**
+     * Hanlde clicks on the inflated options meny
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.hide_ui_button) {
@@ -378,4 +526,5 @@ public class Video extends AppCompatActivity implements ExoPlayer.EventListener 
         }
         return false;
     }
+
 }
