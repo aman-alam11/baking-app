@@ -1,4 +1,4 @@
-package neu.droid.guy.baking_app.Video;
+package neu.droid.guy.baking_app.video;
 
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -6,12 +6,10 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Parcelable;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -37,32 +35,30 @@ import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 
-import org.w3c.dom.Text;
-
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import neu.droid.guy.baking_app.Utils.CheckedData;
+import neu.droid.guy.baking_app.utils.CheckedData;
 import neu.droid.guy.baking_app.R;
 import neu.droid.guy.baking_app.model.Steps;
 
-import static neu.droid.guy.baking_app.Utils.Constants.ASPECT_RATIO_VIDEO_CONSTANT;
-import static neu.droid.guy.baking_app.Utils.Constants.CURRENT_STEP_OBJECT_EXTRA;
-import static neu.droid.guy.baking_app.Utils.Constants.IS_VIDEO_PLAYING;
-import static neu.droid.guy.baking_app.Utils.Constants.RECIPE_INTENT_KEY;
-import static neu.droid.guy.baking_app.Utils.Constants.SEEK_BAR_POSITION;
-import static neu.droid.guy.baking_app.Utils.Constants.SELECTED_STEP_SAVED_STATE;
-import static neu.droid.guy.baking_app.Utils.Constants.STEPS_INTENT_KEY;
-import static neu.droid.guy.baking_app.Utils.Constants.STEP_NUMBER_INTENT;
-import static neu.droid.guy.baking_app.Utils.Constants.WINDOW_INDEX;
+import static neu.droid.guy.baking_app.utils.Constants.ASPECT_RATIO_VIDEO_CONSTANT;
+import static neu.droid.guy.baking_app.utils.Constants.CURRENT_STEP_OBJECT_EXTRA;
+import static neu.droid.guy.baking_app.utils.Constants.IS_VIDEO_PLAYING;
+import static neu.droid.guy.baking_app.utils.Constants.RECIPE_INTENT_KEY;
+import static neu.droid.guy.baking_app.utils.Constants.SEEK_BAR_POSITION;
+import static neu.droid.guy.baking_app.utils.Constants.SELECTED_STEP_SAVED_STATE;
+import static neu.droid.guy.baking_app.utils.Constants.STEPS_INTENT_KEY;
+import static neu.droid.guy.baking_app.utils.Constants.STEP_NUMBER_INTENT;
+import static neu.droid.guy.baking_app.utils.Constants.WINDOW_INDEX;
 
 // TODO: Master slave view
-// TODO: Implement Media Session
-
+// TODO: Previous Button in exoplayer
+// TODO: Widget
+// TODO: UI Testing
 
 public class Video extends AppCompatActivity implements ExoPlayer.EventListener {
     private static boolean FLAG_UPDATE_ARRAY = false;
@@ -90,7 +86,6 @@ public class Video extends AppCompatActivity implements ExoPlayer.EventListener 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_video);
         ButterKnife.bind(this);
-
 
         if (savedInstanceState != null && mMediaPlayer == null) {
             getDataFromSavedInstanceState(savedInstanceState);
@@ -151,6 +146,12 @@ public class Video extends AppCompatActivity implements ExoPlayer.EventListener 
             return;
         }
 
+        if (mCurrentStep.getId() == 0) {
+            Toast.makeText(this,
+                    "Use the player controls to navigate within videos",
+                    Toast.LENGTH_SHORT).show();
+        }
+
         // Extract All urls after current step and append it to media source
         generateListOfUrls();
 
@@ -159,6 +160,10 @@ public class Video extends AppCompatActivity implements ExoPlayer.EventListener 
         mDescriptionTextView.setText(mCurrentStep.getDescription());
     }
 
+    /**
+     * Generate the list of urls to be played when opened from any index of list
+     * Generates all the urls after that index including the current url
+     */
     private void generateListOfUrls() {
         int currentVideoId = mCurrentStep.getId();
         mListOfUrls.clear();
@@ -221,7 +226,6 @@ public class Video extends AppCompatActivity implements ExoPlayer.EventListener 
             mMediaPlayer.seekTo(mMediaPlayer.getCurrentPosition() + mSeekBarPosition);
         } catch (Exception e) {
             e.printStackTrace();
-            Toast.makeText(this, "Unable to fetch url, please try again", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -390,11 +394,6 @@ public class Video extends AppCompatActivity implements ExoPlayer.EventListener 
                 mVideoProgressBar.setVisibility(View.INVISIBLE);
                 break;
         }
-
-//        if (playbackState == PlaybackStateCompat.STATE_FAST_FORWARDING) {
-//        } else if (playbackState == PlaybackStateCompat.STATE_REWINDING) {
-//        }
-
     }
 
     @Override
@@ -449,6 +448,11 @@ public class Video extends AppCompatActivity implements ExoPlayer.EventListener 
         });
     }
 
+    /**
+     * Update with current object on next button press
+     *
+     * @param id The id of the next object which has be displayed
+     */
     private void reviveDataSources(int id) {
         // Update All objects
         mCurrentStep = mListOfSteps.get(id);
@@ -462,6 +466,7 @@ public class Video extends AppCompatActivity implements ExoPlayer.EventListener 
             FLAG_UPDATE_ARRAY = false;
             return;
         }
+        // Update Datasource in case of next video autoplay
         int index = mListOfSteps.size() - mListOfUrls.size() + mMediaPlayer.getCurrentWindowIndex();
         if (index < 0 || index > mListOfSteps.size()) {
             return;

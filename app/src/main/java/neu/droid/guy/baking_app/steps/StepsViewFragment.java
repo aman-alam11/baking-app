@@ -1,4 +1,4 @@
-package neu.droid.guy.baking_app.Steps;
+package neu.droid.guy.baking_app.steps;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -6,27 +6,21 @@ import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import neu.droid.guy.baking_app.Utils.getSelectedItemIndex;
-import neu.droid.guy.baking_app.model.Baking;
+import neu.droid.guy.baking_app.utils.getSelectedItemIndex;
 import neu.droid.guy.baking_app.model.Steps;
 import neu.droid.guy.baking_app.R;
 
-import static neu.droid.guy.baking_app.Utils.Constants.CURRENT_RECIPE_ID;
-import static neu.droid.guy.baking_app.Utils.Constants.STEPS_INTENT_KEY;
+import static neu.droid.guy.baking_app.utils.Constants.CURRENT_RECIPE_ID;
+import static neu.droid.guy.baking_app.utils.Constants.STEPS_INTENT_KEY;
 
 public class StepsViewFragment extends Fragment {
     private List<Steps> mListOfSteps;

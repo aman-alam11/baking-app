@@ -1,4 +1,4 @@
-package neu.droid.guy.baking_app.Utils;
+package neu.droid.guy.baking_app.utils;
 //https://futurestud.io/tutorials/gson-mapping-of-arrays-and-lists-of-objects
 
 import android.content.Context;

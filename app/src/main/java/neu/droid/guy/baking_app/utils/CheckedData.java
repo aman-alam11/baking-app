@@ -1,4 +1,4 @@
-package neu.droid.guy.baking_app.Utils;
+package neu.droid.guy.baking_app.utils;
 
 import java.util.HashMap;
 

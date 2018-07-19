@@ -1,4 +1,4 @@
-package neu.droid.guy.baking_app.Utils;
+package neu.droid.guy.baking_app.utils;
 
 public class Constants {
     public static final String SELECTED_STEP_SAVED_STATE = "SELECTED_STEP_SAVED_STATE";

@@ -1,6 +1,8 @@
-package neu.droid.guy.baking_app.Recipe;
+package neu.droid.guy.baking_app.recipe;
+// Drawable reference: https://www.flaticon.com/free-icon/error_953843#term=internet%20error&page=1&position=14
 
 import android.content.Intent;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.design.widget.Snackbar;
@@ -12,6 +14,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.android.volley.Cache;
 import com.android.volley.RequestQueue;
@@ -21,15 +24,16 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import neu.droid.guy.baking_app.Utils.BuildUrl;
-import neu.droid.guy.baking_app.Utils.ErrorListener;
-import neu.droid.guy.baking_app.Utils.ParseJson;
-import neu.droid.guy.baking_app.Utils.VolleyNetworkQueue;
+import neu.droid.guy.baking_app.utils.BuildUrl;
+import neu.droid.guy.baking_app.utils.CheckInternetConnectivity;
+import neu.droid.guy.baking_app.utils.ErrorListener;
+import neu.droid.guy.baking_app.utils.ParseJson;
+import neu.droid.guy.baking_app.utils.VolleyNetworkQueue;
 import neu.droid.guy.baking_app.model.Baking;
 import neu.droid.guy.baking_app.R;
-import neu.droid.guy.baking_app.Steps.StepsView;
+import neu.droid.guy.baking_app.steps.StepsView;
 
-import static neu.droid.guy.baking_app.Utils.Constants.RECIPE_INTENT_KEY;
+import static neu.droid.guy.baking_app.utils.Constants.RECIPE_INTENT_KEY;
 
 public class MainActivity extends AppCompatActivity implements ParseJson.getJsonResponseAsync,
         SelectRecipeAdapter.ItemClickListener, ErrorListener {
@@ -43,6 +47,7 @@ public class MainActivity extends AppCompatActivity implements ParseJson.getJson
     RecyclerView mSelectRecipeRV;
     @BindView(R.id.no_data_empty_view)
     ImageView emptyImageView;
+    Snackbar sb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +55,20 @@ public class MainActivity extends AppCompatActivity implements ParseJson.getJson
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         setTitle("Recipes");
+
+        if (!CheckInternetConnectivity.isInternetConnectivityAvailable(this)) {
+            emptyImageView.setImageDrawable(getResources().getDrawable(R.drawable.nointerneterror));
+            emptyImageView.setVisibility(View.VISIBLE);
+            // No Internet
+            sb.make(getWindow().getDecorView(),
+                    "No Internet Connection Available",
+                    Snackbar.LENGTH_INDEFINITE).show();
+            return;
+        } else if (sb != null && sb.isShown()) {
+            emptyImageView.setVisibility(View.INVISIBLE);
+            emptyImageView.setImageDrawable(getResources().getDrawable(R.drawable.empty_view));
+            sb.dismiss();
+        }
 
         initRecyclerView();
         if (savedInstanceState != null &&
@@ -217,6 +236,14 @@ public class MainActivity extends AppCompatActivity implements ParseJson.getJson
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        // Check for internet
+        if (!CheckInternetConnectivity.isInternetConnectivityAvailable(MainActivity.this)) {
+            return false;
+        } else if (mRecipeAdapter == null) {
+            // If no internet for first time, and connectivity came back, initialize views first
+            initRecyclerView();
+        }
+
         switch (item.getItemId()) {
             case R.id.refresh_icon:
                 Snackbar dataAvailableSb;

@@ -2,6 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="neu.droid.guy.baking_app">
 
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
@@ -11,18 +12,18 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".Recipe.MainActivity">
+        <activity android:name=".recipe.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".Ingredients.IngredientsView"
-            android:launchMode="singleTop" />
-        <activity android:name=".Steps.StepsView" />
-        <activity android:name=".Video.Video"></activity>
+        <!--<activity-->
+            <!--android:name=".ingredients.IngredientsView"-->
+            <!--android:launchMode="singleTop" />-->
+        <activity android:name=".steps.StepsView" />
+        <activity android:name=".video.Video"></activity>
     </application>
 
 </manifest>

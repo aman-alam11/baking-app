@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Recipe.MainActivity">
+    tools:context=".recipe.MainActivity">
 
     <!--https://www.flaticon.com/free-icon/fuel_545927#term=empty&page=1&position=46-->
     <ImageView

@@ -1,4 +1,4 @@
-package neu.droid.guy.baking_app.Ingredients;
+package neu.droid.guy.baking_app.ingredients;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -10,7 +10,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -20,8 +19,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import neu.droid.guy.baking_app.R;
-import neu.droid.guy.baking_app.Utils.CheckedData;
-import neu.droid.guy.baking_app.Utils.getSelectedItemIndex;
+import neu.droid.guy.baking_app.utils.CheckedData;
 import neu.droid.guy.baking_app.model.Ingredients;
 
 public class IngredientsAdapter extends

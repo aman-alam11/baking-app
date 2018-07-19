@@ -1,4 +1,4 @@
-package neu.droid.guy.baking_app.Steps;
+package neu.droid.guy.baking_app.steps;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -19,8 +19,8 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import neu.droid.guy.baking_app.Utils.CheckedData;
-import neu.droid.guy.baking_app.Utils.getSelectedItemIndex;
+import neu.droid.guy.baking_app.utils.CheckedData;
+import neu.droid.guy.baking_app.utils.getSelectedItemIndex;
 import neu.droid.guy.baking_app.model.Steps;
 import neu.droid.guy.baking_app.R;
 

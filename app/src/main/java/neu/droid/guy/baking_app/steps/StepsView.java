@@ -1,4 +1,4 @@
-package neu.droid.guy.baking_app.Steps;
+package neu.droid.guy.baking_app.steps;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -8,7 +8,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 
@@ -18,21 +17,21 @@ import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import neu.droid.guy.baking_app.Utils.CheckedData;
-import neu.droid.guy.baking_app.Ingredients.IngredientsAdapter;
+import neu.droid.guy.baking_app.utils.CheckedData;
+import neu.droid.guy.baking_app.ingredients.IngredientsAdapter;
 import neu.droid.guy.baking_app.R;
-import neu.droid.guy.baking_app.Utils.getSelectedItemIndex;
-import neu.droid.guy.baking_app.Video.Video;
+import neu.droid.guy.baking_app.utils.getSelectedItemIndex;
+import neu.droid.guy.baking_app.video.Video;
 import neu.droid.guy.baking_app.model.Baking;
 import neu.droid.guy.baking_app.model.Ingredients;
 import neu.droid.guy.baking_app.model.Steps;
 
-import static neu.droid.guy.baking_app.Utils.Constants.CURRENT_RECIPE_ID;
-import static neu.droid.guy.baking_app.Utils.Constants.INGREDIENTS_INTENT_KEY;
-import static neu.droid.guy.baking_app.Utils.Constants.RECIPE_INTENT_KEY;
-import static neu.droid.guy.baking_app.Utils.Constants.RECIPE_NAME;
-import static neu.droid.guy.baking_app.Utils.Constants.STEPS_INTENT_KEY;
-import static neu.droid.guy.baking_app.Utils.Constants.STEP_NUMBER_INTENT;
+import static neu.droid.guy.baking_app.utils.Constants.CURRENT_RECIPE_ID;
+import static neu.droid.guy.baking_app.utils.Constants.INGREDIENTS_INTENT_KEY;
+import static neu.droid.guy.baking_app.utils.Constants.RECIPE_INTENT_KEY;
+import static neu.droid.guy.baking_app.utils.Constants.RECIPE_NAME;
+import static neu.droid.guy.baking_app.utils.Constants.STEPS_INTENT_KEY;
+import static neu.droid.guy.baking_app.utils.Constants.STEP_NUMBER_INTENT;
 
 public class StepsView extends AppCompatActivity
         implements getSelectedItemIndex {
