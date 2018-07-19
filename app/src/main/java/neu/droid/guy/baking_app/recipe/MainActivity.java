@@ -2,17 +2,20 @@ package neu.droid.guy.baking_app.recipe;
 // Drawable reference: https://www.flaticon.com/free-icon/error_953843#term=internet%20error&page=1&position=14
 
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -42,12 +45,12 @@ public class MainActivity extends AppCompatActivity implements ParseJson.getJson
     private final String LOG_TAG = this.getClass().getSimpleName();
     List<Baking> mLocalBakingList = new ArrayList<>();
     private boolean isDataAvailable;
+    private boolean mIsCurrentTwoPaneLayout = false;
 
     @BindView(R.id.select_recipe_recycler_view)
     RecyclerView mSelectRecipeRV;
     @BindView(R.id.no_data_empty_view)
     ImageView emptyImageView;
-    Snackbar sb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,21 +59,20 @@ public class MainActivity extends AppCompatActivity implements ParseJson.getJson
         ButterKnife.bind(this);
         setTitle("Recipes");
 
-        if (!CheckInternetConnectivity.isInternetConnectivityAvailable(this)) {
-            emptyImageView.setImageDrawable(getResources().getDrawable(R.drawable.nointerneterror));
-            emptyImageView.setVisibility(View.VISIBLE);
-            // No Internet
-            sb.make(getWindow().getDecorView(),
-                    "No Internet Connection Available",
-                    Snackbar.LENGTH_INDEFINITE).show();
-            return;
-        } else if (sb != null && sb.isShown()) {
-            emptyImageView.setVisibility(View.INVISIBLE);
-            emptyImageView.setImageDrawable(getResources().getDrawable(R.drawable.empty_view));
-            sb.dismiss();
+        // Check if its a tablet or phone for appropriate layout
+        if (findViewById(R.id.master_slave_two_pane_layout) != null) {
+            // Tablet Mode
+            mIsCurrentTwoPaneLayout = true;
         }
 
-        initRecyclerView();
+        if (!CheckInternetConnectivity.isInternetConnectivityAvailable(this)) {
+            handleNoInternet(R.drawable.nointerneterror, View.VISIBLE, true);
+            return;
+        } else {
+            handleNoInternet(R.drawable.empty_view, View.INVISIBLE, false);
+        }
+
+        initRecyclerView(mIsCurrentTwoPaneLayout);
         if (savedInstanceState != null &&
                 savedInstanceState.getParcelableArrayList(RECIPE_INTENT_KEY) != null) {
             getResponse(savedInstanceState.<Baking>getParcelableArrayList(RECIPE_INTENT_KEY));
@@ -81,20 +83,66 @@ public class MainActivity extends AppCompatActivity implements ParseJson.getJson
     }
 
     /**
+     * Show and hide views based on internet connectivity to keep user informed
+     *
+     * @param drawable            The drawable to set to Image View in case of no internet
+     * @param visibilityImageView Toggle the visibility of image view based on connectivity
+     * @param shouldShowSnack     Show and hide snackbar based on connectivity
+     */
+    private void handleNoInternet(int drawable, int visibilityImageView, boolean shouldShowSnack) {
+        Snackbar snackbar = null;
+        emptyImageView.setImageDrawable(getResources().getDrawable(drawable));
+        emptyImageView.setVisibility(visibilityImageView);
+        if (shouldShowSnack) {
+            // No Internet
+            snackbar.make(getWindow().getDecorView(), R.string.no_internet_connectivity,
+                    Snackbar.LENGTH_INDEFINITE).show();
+        } else {
+            if (snackbar != null && snackbar.isShown()) {
+                snackbar.dismiss();
+            }
+        }
+    }
+
+    /**
      * Initialize RecyclerView
      */
-    private void initRecyclerView() {
+    private void initRecyclerView(Boolean mIsCurrentTwoPaneLayout) {
         // Set all the Recycler View related stuff with a new array list
         // In the meantime, internet request is being parsed in a background thread
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-        layoutManager.setReverseLayout(false);
-        mSelectRecipeRV.setHasFixedSize(true);
-        mSelectRecipeRV.setLayoutManager(layoutManager);
         mRecipeAdapter = new SelectRecipeAdapter(mLocalBakingList,
                 MainActivity.this,
                 this);
+
+        if (mIsCurrentTwoPaneLayout) {
+            //Use Grid Layout Manager
+            setupGridlayout();
+        } else {
+            setupLinearLayout();
+        }
+        mSelectRecipeRV.setHasFixedSize(true);
         mSelectRecipeRV.setAdapter(mRecipeAdapter);
+    }
+
+    /**
+     * Setup the default layout manager in case of mobiles.
+     * We have an alternate layout in case of tabs
+     */
+    private void setupLinearLayout() {
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        layoutManager.setReverseLayout(false);
+        mSelectRecipeRV.setLayoutManager(layoutManager);
+    }
+
+    /**
+     * Setup alternate orientation and recycler view's layout manager in case of tablet
+     */
+    private void setupGridlayout() {
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 3);
+        gridLayoutManager.setOrientation(GridLayoutManager.VERTICAL);
+        gridLayoutManager.setReverseLayout(false);
+        mSelectRecipeRV.setLayoutManager(gridLayoutManager);
     }
 
 
@@ -117,9 +165,7 @@ public class MainActivity extends AppCompatActivity implements ParseJson.getJson
         Cache.Entry cachedData = requestQueue.getCache().get(url);
         if (cachedData == null) {
             json.makeNetworkRequest(BuildUrl.buildRecipeUrl(), this, this);
-            Log.e(LOG_TAG, "making new request");
         } else {
-            Log.e(LOG_TAG, "getting data from cache");
             json.parseJsonArrayUsingGson(new String(cachedData.data));
         }
 
@@ -241,28 +287,29 @@ public class MainActivity extends AppCompatActivity implements ParseJson.getJson
             return false;
         } else if (mRecipeAdapter == null) {
             // If no internet for first time, and connectivity came back, initialize views first
-            initRecyclerView();
+            initRecyclerView(mIsCurrentTwoPaneLayout);
         }
 
         switch (item.getItemId()) {
             case R.id.refresh_icon:
-                Snackbar dataAvailableSb;
                 if (isDataAvailable) {
-                    dataAvailableSb =
-                            Snackbar.make(getWindow().getDecorView(),
-                                    "All Caught Up",
-                                    Snackbar.LENGTH_SHORT);
+                    showSnackBar("All caught Up");
                 } else {
-                    dataAvailableSb =
-                            Snackbar.make(getWindow().getDecorView(),
-                                    "Fetching Data",
-                                    Snackbar.LENGTH_SHORT);
+                    showSnackBar("Fetching Data");
                     makeInternetRequest();
                 }
-                dataAvailableSb.show();
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * Show Snackbar helper
+     *
+     * @param snackToDisplay The message to display via Snackbar
+     */
+    private void showSnackBar(String snackToDisplay) {
+        Snackbar.make(getWindow().getDecorView(), snackToDisplay, Snackbar.LENGTH_SHORT).show();
     }
 
     /**

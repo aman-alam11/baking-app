@@ -7,4 +7,6 @@
     <string name="refresh_data">Refresh Data</string>
     <string name="full_screen">Full Screen</string>
     <string name="ingredients_dialog_title">Ingredients for recipe</string>
+    <string name="no_internet_connectivity">No Internet Connection Available</string>
+    <string name="no_internet_connectivity_video">Can\'t play videos. Please connect to Internet</string>
 </resources>

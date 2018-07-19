@@ -111,7 +111,7 @@ public class SelectRecipeAdapter extends RecyclerView.Adapter<SelectRecipeAdapte
         @BindView(R.id.recipe_serves_people_number)
         TextView recipeServesPeopleNum;
 
-        public SelectRecipeViewHolder(View itemView) {
+        SelectRecipeViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
             itemView.setOnClickListener(this);

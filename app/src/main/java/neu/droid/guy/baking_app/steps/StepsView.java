@@ -8,6 +8,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 
@@ -17,6 +18,7 @@ import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import neu.droid.guy.baking_app.utils.CheckInternetConnectivity;
 import neu.droid.guy.baking_app.utils.CheckedData;
 import neu.droid.guy.baking_app.ingredients.IngredientsAdapter;
 import neu.droid.guy.baking_app.R;
@@ -131,6 +133,13 @@ public class StepsView extends AppCompatActivity
      */
     @Override
     public void selectedStepPosition(int index) {
+
+        if (!CheckInternetConnectivity.isInternetConnectivityAvailable(StepsView.this)) {
+            Toast.makeText(this,
+                    R.string.no_internet_connectivity_video,
+                    Toast.LENGTH_LONG).show();
+            return;
+        }
         Intent showVideo = new Intent(this, Video.class);
         showVideo.putParcelableArrayListExtra(STEPS_INTENT_KEY, (ArrayList<? extends Parcelable>) mStepsList);
         showVideo.putExtra(STEP_NUMBER_INTENT, index);
