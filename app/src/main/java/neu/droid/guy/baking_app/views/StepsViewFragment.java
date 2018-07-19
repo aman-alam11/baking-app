@@ -1,4 +1,4 @@
-package neu.droid.guy.baking_app.steps;
+package neu.droid.guy.baking_app.views;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -18,6 +18,7 @@ import java.util.List;
 import neu.droid.guy.baking_app.utils.getSelectedItemIndex;
 import neu.droid.guy.baking_app.model.Steps;
 import neu.droid.guy.baking_app.R;
+import neu.droid.guy.baking_app.views.adapters.StepsAdapter;
 
 import static neu.droid.guy.baking_app.utils.Constants.CURRENT_RECIPE_ID;
 import static neu.droid.guy.baking_app.utils.Constants.STEPS_INTENT_KEY;
@@ -26,7 +27,6 @@ public class StepsViewFragment extends Fragment {
     private List<Steps> mListOfSteps;
     private int mCurrentRecipeId;
     private StepsAdapter mStepsAdapter;
-    private int mHolder = 0;
 
     public StepsViewFragment() {
     }
@@ -100,7 +100,6 @@ public class StepsViewFragment extends Fragment {
 
 
     public void updateSelectedItem(int position) {
-        mHolder = position;
         mStepsAdapter.notifyItemChanged(position);
     }
 }

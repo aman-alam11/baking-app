@@ -1,4 +1,4 @@
-package neu.droid.guy.baking_app.recipe;
+package neu.droid.guy.baking_app.views.adapters;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;

@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".steps.StepsView">
+    tools:context=".views.StepsView">
 
     <android.support.v7.widget.CardView
         android:id="@+id/cardView3"
@@ -13,13 +13,13 @@
         app:cardElevation="20dp">
 
         <Button
-            android:background="@color/black"
-            android:textColor="@color/colorAccent"
-            android:text="Show Ingredients"
-            android:layout_margin="10dp"
             android:id="@+id/ingredients_button"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:background="@color/black"
+            android:text="@string/show_ingredients_button_text_generic"
+            android:textColor="@color/colorAccent" />
 
     </android.support.v7.widget.CardView>
 

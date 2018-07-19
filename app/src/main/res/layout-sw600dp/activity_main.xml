@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/master_slave_two_pane_layout"
+    android:id="@+id/master_slave_recipe_view"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    tools:context=".recipe.MainActivity">
+    android:layout_height="wrap_content">
 
     <!--https://www.flaticon.com/free-icon/fuel_545927#term=empty&page=1&position=46-->
     <ImageView

@@ -1,8 +1,9 @@
-package neu.droid.guy.baking_app.steps;
+package neu.droid.guy.baking_app.views;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.util.Log;
@@ -19,11 +20,9 @@ import java.util.Objects;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import neu.droid.guy.baking_app.utils.CheckInternetConnectivity;
-import neu.droid.guy.baking_app.utils.CheckedData;
-import neu.droid.guy.baking_app.ingredients.IngredientsAdapter;
+import neu.droid.guy.baking_app.views.adapters.IngredientsAdapter;
 import neu.droid.guy.baking_app.R;
 import neu.droid.guy.baking_app.utils.getSelectedItemIndex;
-import neu.droid.guy.baking_app.video.Video;
 import neu.droid.guy.baking_app.model.Baking;
 import neu.droid.guy.baking_app.model.Ingredients;
 import neu.droid.guy.baking_app.model.Steps;
@@ -44,6 +43,7 @@ public class StepsView extends AppCompatActivity
     private String mRecipeName;
     private int mBakingId;
     private StepsViewFragment stepsFragment;
+    private boolean mIsViewTwoPaneLayout = false;
 
     @BindView(R.id.ingredients_button)
     Button mShowIngredientsButton;
@@ -54,32 +54,51 @@ public class StepsView extends AppCompatActivity
         setContentView(R.layout.activity_steps_view);
         ButterKnife.bind(this);
 
+        if (findViewById(R.id.master_slave_video_view) != null) {
+            mIsViewTwoPaneLayout = true;
+        }
+
         // Handle Rotation
         checkSavedInstanceState(savedInstanceState);
 
+        // Get Data From Intent
         if (getIntent().hasExtra(RECIPE_INTENT_KEY) && mStepsList == null) {
-            try {
-                Baking mSelectedRecipe = (Baking) Objects.requireNonNull(getIntent().getExtras()).get(RECIPE_INTENT_KEY);
-                assert mSelectedRecipe != null;
-                mBakingId = mSelectedRecipe.getId();
-                mStepsList = Objects.requireNonNull(mSelectedRecipe).getSteps();
-                mIngredientsList = mSelectedRecipe.getIngredients();
-
-                mRecipeName = mSelectedRecipe.getName();
-                setTitle(mRecipeName + ": Steps Involved");
-            } catch (Exception e) {
-                Log.e(this.getClass().getSimpleName(), "Unable to change activity title");
-            }
+            initDataFromIntent(getIntent().getExtras());
         }
 
         fallbackArrays();
-        initFragment();
+        initStepsFragment();
+        if (mIsViewTwoPaneLayout) {
+            initIngredientFragment();
+        }
         mShowIngredientsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 displayIngredients();
             }
         });
+    }
+
+    private void initIngredientFragment() {
+        FragmentManager manager = getSupportFragmentManager();
+        IngredientsFragment ingredientsFragment = IngredientsFragment.newInstance(mIngredientsList);
+        manager.beginTransaction().add(R.id.ingredients_fragment_view, ingredientsFragment).commit();
+
+    }
+
+    private void initDataFromIntent(Bundle extrasBundle) {
+        try {
+            Baking mSelectedRecipe = (Baking) Objects.requireNonNull(extrasBundle).get(RECIPE_INTENT_KEY);
+            assert mSelectedRecipe != null;
+            mBakingId = mSelectedRecipe.getId();
+            mStepsList = Objects.requireNonNull(mSelectedRecipe).getSteps();
+            mIngredientsList = mSelectedRecipe.getIngredients();
+            mRecipeName = mSelectedRecipe.getName();
+            setTitle(mRecipeName + ": Steps Involved");
+
+        } catch (Exception e) {
+            Log.e(this.getClass().getSimpleName(), "Unable to change activity title");
+        }
     }
 
 
@@ -93,7 +112,7 @@ public class StepsView extends AppCompatActivity
         MaterialDialog materialDialog = new MaterialDialog.Builder(StepsView.this)
                 .title(R.string.ingredients_dialog_title)
                 .adapter(
-                        new IngredientsAdapter(mIngredientsList, StepsView.this, mBakingId),
+                        new IngredientsAdapter(mIngredientsList, StepsView.this),
                         recyclerViewManager)
                 .build();
 
@@ -105,7 +124,7 @@ public class StepsView extends AppCompatActivity
      * Setup fragments and pass the arguments of List<Steps>
      * Setup Ingredient button
      */
-    private void initFragment() {
+    private void initStepsFragment() {
         stepsFragment = StepsViewFragment.newInstance(mStepsList, mBakingId);
         getSupportFragmentManager().beginTransaction().add(R.id.steps_fragment_container, stepsFragment).commit();
     }
@@ -140,11 +159,10 @@ public class StepsView extends AppCompatActivity
                     Toast.LENGTH_LONG).show();
             return;
         }
-        Intent showVideo = new Intent(this, Video.class);
+        Intent showVideo = new Intent(this, VideoView.class);
         showVideo.putParcelableArrayListExtra(STEPS_INTENT_KEY, (ArrayList<? extends Parcelable>) mStepsList);
         showVideo.putExtra(STEP_NUMBER_INTENT, index);
         showVideo.putExtra(RECIPE_INTENT_KEY, mBakingId);
-        CheckedData.getInstance().getStepsCompleted(mBakingId).put(index, true);
         stepsFragment.updateSelectedItem(index);
         startActivity(showVideo);
 

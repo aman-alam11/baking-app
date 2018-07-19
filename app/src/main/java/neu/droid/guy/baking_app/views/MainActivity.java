@@ -1,9 +1,7 @@
-package neu.droid.guy.baking_app.recipe;
+package neu.droid.guy.baking_app.views;
 // Drawable reference: https://www.flaticon.com/free-icon/error_953843#term=internet%20error&page=1&position=14
 
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
-import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.design.widget.Snackbar;
@@ -11,13 +9,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.GridLayout;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.android.volley.Cache;
 import com.android.volley.RequestQueue;
@@ -27,14 +22,14 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import neu.droid.guy.baking_app.R;
 import neu.droid.guy.baking_app.utils.BuildUrl;
 import neu.droid.guy.baking_app.utils.CheckInternetConnectivity;
 import neu.droid.guy.baking_app.utils.ErrorListener;
 import neu.droid.guy.baking_app.utils.ParseJson;
 import neu.droid.guy.baking_app.utils.VolleyNetworkQueue;
 import neu.droid.guy.baking_app.model.Baking;
-import neu.droid.guy.baking_app.R;
-import neu.droid.guy.baking_app.steps.StepsView;
+import neu.droid.guy.baking_app.views.adapters.SelectRecipeAdapter;
 
 import static neu.droid.guy.baking_app.utils.Constants.RECIPE_INTENT_KEY;
 
@@ -60,7 +55,7 @@ public class MainActivity extends AppCompatActivity implements ParseJson.getJson
         setTitle("Recipes");
 
         // Check if its a tablet or phone for appropriate layout
-        if (findViewById(R.id.master_slave_two_pane_layout) != null) {
+        if (findViewById(R.id.master_slave_recipe_view) != null) {
             // Tablet Mode
             mIsCurrentTwoPaneLayout = true;
         }

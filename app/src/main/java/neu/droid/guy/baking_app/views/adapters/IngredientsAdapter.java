@@ -1,4 +1,4 @@
-package neu.droid.guy.baking_app.ingredients;
+package neu.droid.guy.baking_app.views.adapters;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -19,7 +19,6 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import neu.droid.guy.baking_app.R;
-import neu.droid.guy.baking_app.utils.CheckedData;
 import neu.droid.guy.baking_app.model.Ingredients;
 
 public class IngredientsAdapter extends
@@ -27,14 +26,11 @@ public class IngredientsAdapter extends
 
     private List<Ingredients> mListOfIngredients;
     private Context mContext;
-    private int mRecipeNumber;
 
     public IngredientsAdapter(List<Ingredients> ingredientsList,
-                              Context context,
-                              int recipeNumberSelected) {
+                              Context context) {
         mListOfIngredients = ingredientsList;
         mContext = context;
-        mRecipeNumber = recipeNumberSelected;
     }
 
     /**
@@ -70,17 +66,6 @@ public class IngredientsAdapter extends
         String measureQty = mListOfIngredients.get(position).getQuantity() + " " +
                 mListOfIngredients.get(position).getMeasure();
         holder.bindViewsIngredients(mListOfIngredients.get(position).getIngredient(), measureQty);
-        if (checkListForSelected(position)) {
-            holder.isIngredientAdded.setChecked(true);
-        }
-    }
-
-    Boolean checkListForSelected(int position) {
-        Boolean isChecked = (Boolean) CheckedData.getInstance().getIngredientsCompleted(mRecipeNumber).get(position);
-        if (isChecked == null || !isChecked) {
-            return false;
-        }
-        return true;
     }
 
     /**
@@ -101,34 +86,12 @@ public class IngredientsAdapter extends
         TextView ingredientNameTextView;
         @BindView(R.id.measure_quantity)
         TextView measureQuantityTextView;
-        @BindView(R.id.ingredient_checked)
-        AppCompatCheckBox isIngredientAdded;
         @BindView(R.id.root_item_view_recipe_card)
         CardView rootCardView;
 
         ViewRecipeViewHolder(final View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
-
-            rootCardView.setOnClickListener(new View.OnClickListener() {
-
-                /**
-                 * Called when a view has been clicked.
-                 *
-                 * @param v The view that was clicked.
-                 */
-                @Override
-                public void onClick(View v) {
-                    if (isIngredientAdded.isChecked())
-                        isIngredientAdded.setChecked(false);
-                    else {
-                        isIngredientAdded.setChecked(true);
-                    }
-
-                    updateStaticList(getAdapterPosition());
-                }
-            });
-
         }
 
         /**
@@ -140,55 +103,7 @@ public class IngredientsAdapter extends
         private void bindViewsIngredients(final String ingredient, String measureQty) {
             ingredientNameTextView.setText(StringUtils.capitalize(ingredient));
             measureQuantityTextView.setText(measureQty);
-            isIngredientAdded.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    if (isChecked) {
-                        // Dark Card background with light text color
-                        setTheme(mContext.getResources().getColor(R.color.cardview_dark_background),
-                                mContext.getResources().getColor(R.color.cardview_light_background));
-                    } else {
-                        // Light Card background with dark text color
-                        setTheme(mContext.getResources().getColor(R.color.cardview_light_background),
-                                mContext.getResources().getColor(R.color.cardview_dark_background));
-                    }
-                }
-            });
         }
-
-
-        private void setTheme(int colorRootView, int colorText) {
-            rootCardView.setBackgroundColor(colorRootView);
-            ingredientNameTextView.setTextColor(colorText);
-            measureQuantityTextView.setTextColor(colorText);
-        }
-
-        /**
-         * Formulate various cases based on
-         *
-         * @param adapterPosition The position clicked on
-         */
-        private void updateStaticList(int adapterPosition) {
-            HashMap<Integer, Boolean> localMap = CheckedData.getInstance().getIngredientsCompleted(mRecipeNumber);
-            if (localMap.get(getAdapterPosition()) == null) {
-                updateDataHelper(adapterPosition, true);
-            } else if (localMap.get(getAdapterPosition())) {
-                updateDataHelper(adapterPosition, false);
-            } else {
-                updateDataHelper(adapterPosition, true);
-            }
-        }
-
-        /**
-         * Update CheckedList
-         *
-         * @param adapterPos The position clicked on
-         * @param pref       The preference to update in static list based on if the checked box is clicked or not
-         */
-        void updateDataHelper(int adapterPos, Boolean pref) {
-            CheckedData.getInstance().getIngredientsCompleted(mRecipeNumber).put(adapterPos, pref);
-        }
-
 
     }
 

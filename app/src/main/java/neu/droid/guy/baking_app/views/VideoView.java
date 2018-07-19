@@ -1,4 +1,4 @@
-package neu.droid.guy.baking_app.video;
+package neu.droid.guy.baking_app.views;
 
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -41,7 +41,6 @@ import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import neu.droid.guy.baking_app.utils.CheckedData;
 import neu.droid.guy.baking_app.R;
 import neu.droid.guy.baking_app.model.Steps;
 
@@ -60,7 +59,7 @@ import static neu.droid.guy.baking_app.utils.Constants.WINDOW_INDEX;
 // TODO: Widget
 // TODO: UI Testing
 
-public class Video extends AppCompatActivity implements ExoPlayer.EventListener {
+public class VideoView extends AppCompatActivity implements ExoPlayer.EventListener {
     private static boolean FLAG_UPDATE_ARRAY = false;
     private List<Steps> mListOfSteps;
     private Steps mCurrentStep;
@@ -119,7 +118,6 @@ public class Video extends AppCompatActivity implements ExoPlayer.EventListener 
             List<Steps> listOfSteps = extrasBundle.getParcelableArrayList(STEPS_INTENT_KEY);
             int recipeNum = extrasBundle.getInt(RECIPE_INTENT_KEY);
             mSelectedStepNumber = extrasBundle.getInt(STEP_NUMBER_INTENT);
-            CheckedData.getInstance().getStepsCompleted(recipeNum).put(mSelectedStepNumber, true);
             setupData(listOfSteps,
                     listOfSteps.get(mSelectedStepNumber));
         } catch (Exception e) {
@@ -202,7 +200,7 @@ public class Video extends AppCompatActivity implements ExoPlayer.EventListener 
             noVideoView();
             return;
         }
-        mMediaPlayer = ExoPlayerFactory.newSimpleInstance(new DefaultRenderersFactory(Video.this),
+        mMediaPlayer = ExoPlayerFactory.newSimpleInstance(new DefaultRenderersFactory(VideoView.this),
                 new DefaultTrackSelector(),
                 new DefaultLoadControl());
 

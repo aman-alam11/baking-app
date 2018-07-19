@@ -1,4 +1,4 @@
-package neu.droid.guy.baking_app.steps;
+package neu.droid.guy.baking_app.views.adapters;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -19,7 +19,6 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import neu.droid.guy.baking_app.utils.CheckedData;
 import neu.droid.guy.baking_app.utils.getSelectedItemIndex;
 import neu.droid.guy.baking_app.model.Steps;
 import neu.droid.guy.baking_app.R;
@@ -30,10 +29,10 @@ public class StepsAdapter extends RecyclerView.Adapter<StepsAdapter.StepsViewHol
     private getSelectedItemIndex mSelectedStepInterface;
     private Integer mRecipeId;
 
-    StepsAdapter(List<Steps> listOfSteps,
-                 getSelectedItemIndex selectedIndexInterface,
-                 Context context,
-                 Integer currentRecipeId) {
+    public StepsAdapter(List<Steps> listOfSteps,
+                        getSelectedItemIndex selectedIndexInterface,
+                        Context context,
+                        Integer currentRecipeId) {
         mListOfSteps = listOfSteps;
         mContext = context;
         mSelectedStepInterface = selectedIndexInterface;
@@ -95,10 +94,6 @@ public class StepsAdapter extends RecyclerView.Adapter<StepsAdapter.StepsViewHol
         if (TextUtils.isEmpty(mListOfSteps.get(position).getVideoURL())) {
             holder.mIconImageView.setImageDrawable(mContext.getResources().getDrawable(R.drawable.cookingpan24));
         }
-        Boolean isStepCompleted = (Boolean) CheckedData.getInstance().getStepsCompleted(mRecipeId).get(position);
-        if (isStepCompleted != null) {
-            holder.mStepsCheckBox.setChecked(isStepCompleted);
-        }
     }
 
     /**
@@ -125,8 +120,6 @@ public class StepsAdapter extends RecyclerView.Adapter<StepsAdapter.StepsViewHol
         ImageView mIconImageView;
         @BindView(R.id.steps_card_view)
         CardView mStepsCardView;
-        @BindView(R.id.steps_check_box)
-        CheckBox mStepsCheckBox;
 
 
         StepsViewHolder(View itemView) {
@@ -142,9 +135,6 @@ public class StepsAdapter extends RecyclerView.Adapter<StepsAdapter.StepsViewHol
          */
         @Override
         public void onClick(View v) {
-            if (CheckedData.getInstance().getStepsCompleted(mRecipeId).get(getAdapterPosition()) != null) {
-                mStepsCheckBox.setChecked((Boolean) CheckedData.getInstance().getStepsCompleted(mRecipeId).get(getAdapterPosition()));
-            }
             mSelectedStepInterface.selectedStepPosition(getAdapterPosition());
         }
     }
