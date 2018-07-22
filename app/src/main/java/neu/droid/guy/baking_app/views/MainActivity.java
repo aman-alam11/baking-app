@@ -13,6 +13,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 
 import com.android.volley.Cache;
 import com.android.volley.RequestQueue;
@@ -32,20 +33,25 @@ import neu.droid.guy.baking_app.model.Baking;
 import neu.droid.guy.baking_app.views.adapters.SelectRecipeAdapter;
 
 import static neu.droid.guy.baking_app.utils.Constants.RECIPE_INTENT_KEY;
+import static neu.droid.guy.baking_app.utils.Constants.RECIPE_NAMES_LIST_KEY;
+import static neu.droid.guy.baking_app.utils.Constants.WIDGET_INDEX_RECIPE_KEY;
 
 public class MainActivity extends AppCompatActivity implements ParseJson.getJsonResponseAsync,
         SelectRecipeAdapter.ItemClickListener, ErrorListener {
 
     private SelectRecipeAdapter mRecipeAdapter;
-    private final String LOG_TAG = this.getClass().getSimpleName();
     List<Baking> mLocalBakingList = new ArrayList<>();
+    ArrayList<String> mRecipeNamesList = new ArrayList<>();
     private boolean isDataAvailable;
     private boolean mIsCurrentTwoPaneLayout = false;
+//    private int mIndexFromWidget = -1;
 
     @BindView(R.id.select_recipe_recycler_view)
     RecyclerView mSelectRecipeRV;
     @BindView(R.id.no_data_empty_view)
     ImageView emptyImageView;
+    @BindView(R.id.widget_loading_progress_bar)
+    ProgressBar mLoadingProgressbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +59,8 @@ public class MainActivity extends AppCompatActivity implements ParseJson.getJson
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         setTitle("Recipes");
+
+        // Check if opened by widget, if yes, get data and intent to stepsview
 
         // Check if its a tablet or phone for appropriate layout
         if (findViewById(R.id.master_slave_recipe_view) != null) {
@@ -67,14 +75,28 @@ public class MainActivity extends AppCompatActivity implements ParseJson.getJson
             handleNoInternet(R.drawable.empty_view, View.INVISIBLE, false);
         }
 
+//        if (getIntent().hasExtra(WIDGET_INDEX_RECIPE_KEY)) {
+//            mIndexFromWidget = getIntent().getExtras().getInt(WIDGET_INDEX_RECIPE_KEY);
+//            // Get all the data for the Steps Screen from Internet
+//            makeInternetRequest();
+//
+//            // Make an intent to open the selected recipe
+//            if (mIndexFromWidget > -1)
+//                onItemClicked(mIndexFromWidget);
+//
+//            return;
+//        }
+
         initRecyclerView(mIsCurrentTwoPaneLayout);
         if (savedInstanceState != null &&
                 savedInstanceState.getParcelableArrayList(RECIPE_INTENT_KEY) != null) {
             getResponse(savedInstanceState.<Baking>getParcelableArrayList(RECIPE_INTENT_KEY));
+
         } else {
             makeInternetRequest();
         }
-
+        // Make a list of all recipe names
+//        getAllRecipeNames();
     }
 
     /**
@@ -173,6 +195,7 @@ public class MainActivity extends AppCompatActivity implements ParseJson.getJson
      */
     @Override
     public void getResponse(List<Baking> listOfBaking) {
+        mLoadingProgressbar.setVisibility(View.INVISIBLE);
         isDataAvailable = true;
         if (listOfBaking == null || listOfBaking.size() <= 0) {
             return;
@@ -180,6 +203,10 @@ public class MainActivity extends AppCompatActivity implements ParseJson.getJson
 
         // Update and replace dummy list with original data
         mLocalBakingList.addAll(listOfBaking);
+//        if (mIndexFromWidget > -1) {
+//            // Intent to StepsView Activity
+//            return;
+//        }
         // Notify the adapter about the change
         mRecipeAdapter.notifyDataSetChanged();
     }
@@ -197,6 +224,8 @@ public class MainActivity extends AppCompatActivity implements ParseJson.getJson
 
         Intent openRecipeDetails = new Intent(this, StepsView.class);
         openRecipeDetails.putExtra(RECIPE_INTENT_KEY, mLocalBakingList.get(position));
+        openRecipeDetails.putExtra(WIDGET_INDEX_RECIPE_KEY, position);
+
         startActivity(openRecipeDetails);
     }
 
@@ -319,5 +348,23 @@ public class MainActivity extends AppCompatActivity implements ParseJson.getJson
             outState.putParcelableArrayList(RECIPE_INTENT_KEY,
                     (ArrayList<? extends Parcelable>) mLocalBakingList);
         }
+
+        if (mRecipeNamesList != null && mRecipeNamesList.size() > 0) {
+            outState.putStringArrayList(RECIPE_NAMES_LIST_KEY, mRecipeNamesList);
+        }
     }
+
+//    private void getAllRecipeNames() {
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                if (mRecipeNamesList != null && mRecipeNamesList.size() > 0) {
+//                    return;
+//                }
+//                for (int i = 0; i < mLocalBakingList.size(); i++) {
+//                    mRecipeNamesList.add(mLocalBakingList.get(i).getName());
+//                }
+//            }
+//        }).start();
+//    }
 }

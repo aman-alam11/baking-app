@@ -23,6 +23,7 @@ public class ParseJson {
 
     private getJsonResponseAsync mResponseAsync;
     private ErrorListener mDeliverError;
+    public static List<Baking> mStaticBakingList;
 
     public ParseJson(getJsonResponseAsync responseAsync) {
         mResponseAsync = responseAsync;
@@ -67,6 +68,10 @@ public class ParseJson {
         }.getType();
         // Change the JsonArray to ArrayList of Baking objects
         List<Baking> listOfBakingObjects = gson.fromJson(response, bakingResponseListType);
+        if (mStaticBakingList == null) {
+            mStaticBakingList = new ArrayList<>();
+        }
+        mStaticBakingList.addAll(listOfBakingObjects);
         // To send data to calling activity async
         mResponseAsync.getResponse(listOfBakingObjects);
     }

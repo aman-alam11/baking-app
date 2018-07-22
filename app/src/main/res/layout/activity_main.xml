@@ -6,6 +6,12 @@
     android:layout_height="match_parent"
     tools:context=".views.MainActivity">
 
+    <ProgressBar
+        android:id="@+id/widget_loading_progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center" />
+
     <!--https://www.flaticon.com/free-icon/fuel_545927#term=empty&page=1&position=46-->
     <ImageView
         android:id="@+id/no_data_empty_view"

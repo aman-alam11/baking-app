@@ -54,9 +54,8 @@ import static neu.droid.guy.baking_app.utils.Constants.STEPS_INTENT_KEY;
 import static neu.droid.guy.baking_app.utils.Constants.STEP_NUMBER_INTENT;
 import static neu.droid.guy.baking_app.utils.Constants.WINDOW_INDEX;
 
-// TODO: Master slave view
 // TODO: Previous Button in exoplayer
-// TODO: Widget
+// TODO: handle tablet video playback
 // TODO: UI Testing
 
 public class VideoView extends AppCompatActivity implements ExoPlayer.EventListener {
@@ -428,7 +427,9 @@ public class VideoView extends AppCompatActivity implements ExoPlayer.EventListe
             @Override
             public void onClick(View v) {
                 // Hide the next button
-                if (!TextUtils.isEmpty(mListOfSteps.get(mCurrentStep.getId() + 1).getVideoURL())) {
+                if (mCurrentStep.getId() + 1 < mListOfSteps.size() &&
+                        !TextUtils.isEmpty(mListOfSteps.get(mCurrentStep.getId() + 1).getVideoURL())
+                        ) {
                     mNextVideoButton.setVisibility(View.INVISIBLE);
                 }
 
