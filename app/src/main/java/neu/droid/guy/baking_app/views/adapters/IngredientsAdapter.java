@@ -2,18 +2,15 @@ package neu.droid.guy.baking_app.views.adapters;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.support.v7.widget.AppCompatCheckBox;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CompoundButton;
 import android.widget.TextView;
 
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.HashMap;
 import java.util.List;
 
 import butterknife.BindView;
@@ -56,7 +53,7 @@ public class IngredientsAdapter extends
     @NonNull
     @Override
     public ViewRecipeViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View inflatedView = LayoutInflater.from(mContext).inflate(R.layout.rv_item_view_recipe,
+        View inflatedView = LayoutInflater.from(mContext).inflate(R.layout.rv_item_view_ingredients,
                 parent, false);
         return new ViewRecipeViewHolder(inflatedView);
     }

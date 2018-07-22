@@ -31,7 +31,9 @@ import neu.droid.guy.baking_app.model.Ingredients;
 import neu.droid.guy.baking_app.model.Steps;
 import neu.droid.guy.baking_app.widget.IngredientWidget;
 
+import static neu.droid.guy.baking_app.utils.Constants.CURENT_STEP_INDEX;
 import static neu.droid.guy.baking_app.utils.Constants.CURRENT_RECIPE_ID;
+import static neu.droid.guy.baking_app.utils.Constants.CURRENT_SEEK_BAR_POSITION;
 import static neu.droid.guy.baking_app.utils.Constants.INGREDIENTS_INTENT_KEY;
 import static neu.droid.guy.baking_app.utils.Constants.RECIPE_INTENT_KEY;
 import static neu.droid.guy.baking_app.utils.Constants.RECIPE_NAME;
@@ -46,13 +48,15 @@ public class StepsView extends AppCompatActivity
 
     private List<Steps> mStepsList;
     private List<Ingredients> mIngredientsList;
-    //    private ArrayList<String> mListRecipeName;
     private String mRecipeName;
     private int mBakingId;
     private StepsViewFragment stepsFragment;
     private boolean mIsViewTwoPaneLayout = false;
-    private boolean mWidgetPickerShowing = false;
     private int mWidgetIndex = 0;
+    private FragmentManager manager;
+    private VideoViewFragment videoViewFragment;
+    int mStepIndex = 0;
+    long mSeekBarPosition = 0;
 
     @BindView(R.id.ingredients_button)
     Button mShowIngredientsButton;
@@ -66,11 +70,11 @@ public class StepsView extends AppCompatActivity
         // Check if its a tablet or cellphone and show appropriate layout
         if (findViewById(R.id.master_slave_video_view) != null) {
             mIsViewTwoPaneLayout = true;
+            manager = getSupportFragmentManager();
         }
 
         // Handle Rotation
         checkSavedInstanceState(savedInstanceState);
-
         // Get Data From Intent
         if (getIntent().hasExtra(RECIPE_INTENT_KEY) && mStepsList == null) {
             initDataFromIntent(getIntent().getExtras());
@@ -80,6 +84,7 @@ public class StepsView extends AppCompatActivity
         initStepsFragment();
         if (mIsViewTwoPaneLayout) {
             initIngredientFragment();
+            initVideoFragment(mStepIndex);
         }
         mShowIngredientsButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -101,10 +106,25 @@ public class StepsView extends AppCompatActivity
      * Initialize Ingredients Fragment in case of two pane view
      */
     private void initIngredientFragment() {
-        FragmentManager manager = getSupportFragmentManager();
         IngredientsFragment ingredientsFragment = IngredientsFragment.newInstance(mIngredientsList);
         manager.beginTransaction().add(R.id.ingredients_fragment_view, ingredientsFragment).commit();
     }
+
+    private void initVideoFragment(int stepIndex) {
+        mStepIndex = stepIndex;
+        videoViewFragment = VideoViewFragment.newInstance(mStepsList, stepIndex,
+                mIsViewTwoPaneLayout, mSeekBarPosition);
+        manager.beginTransaction().add(R.id.fragment_frame_id, videoViewFragment).commit();
+    }
+
+    private void removeCurrentFragment() {
+        if (videoViewFragment != null) {
+            // Handle in fragment
+            mSeekBarPosition = 0;
+            manager.beginTransaction().remove(videoViewFragment).commit();
+        }
+    }
+
 
     /**
      * Initialize data from intent which started the activity
@@ -170,7 +190,8 @@ public class StepsView extends AppCompatActivity
         mStepsList = savedInstanceState.getParcelableArrayList(STEPS_INTENT_KEY);
         mIngredientsList = savedInstanceState.getParcelableArrayList(INGREDIENTS_INTENT_KEY);
         mBakingId = savedInstanceState.getInt(CURRENT_RECIPE_ID);
-//        mListRecipeName = savedInstanceState.getStringArrayList(RECIPE_NAMES_LIST_KEY);
+        mStepIndex = savedInstanceState.getInt(CURENT_STEP_INDEX);
+        mSeekBarPosition = savedInstanceState.getLong(CURRENT_SEEK_BAR_POSITION);
     }
 
 
@@ -186,13 +207,20 @@ public class StepsView extends AppCompatActivity
                     Toast.LENGTH_LONG).show();
             return;
         }
-        Intent showVideo = new Intent(this, VideoView.class);
-        showVideo.putParcelableArrayListExtra(STEPS_INTENT_KEY, (ArrayList<? extends Parcelable>) mStepsList);
-        showVideo.putExtra(STEP_NUMBER_INTENT, index);
-        showVideo.putExtra(RECIPE_INTENT_KEY, mBakingId);
-        stepsFragment.updateSelectedItem(index);
-        startActivity(showVideo);
 
+
+        // If not tables, open the new activity, else load a new fragment
+        if (!mIsViewTwoPaneLayout) {
+            Intent showVideo = new Intent(this, VideoView.class);
+            showVideo.putParcelableArrayListExtra(STEPS_INTENT_KEY, (ArrayList<? extends Parcelable>) mStepsList);
+            showVideo.putExtra(STEP_NUMBER_INTENT, index);
+            showVideo.putExtra(RECIPE_INTENT_KEY, mBakingId);
+            stepsFragment.updateSelectedItem(index);
+            startActivity(showVideo);
+        } else {
+            removeCurrentFragment();
+            initVideoFragment(index);
+        }
     }
 
 
@@ -216,13 +244,12 @@ public class StepsView extends AppCompatActivity
             outState.putString(RECIPE_NAME, mRecipeName);
             outState.putInt(CURRENT_RECIPE_ID, mBakingId);
         }
-
-//        if (mListRecipeName != null && mListRecipeName.size() > 0) {
-//            outState.putStringArrayList(RECIPE_NAMES_LIST_KEY, mListRecipeName);
-//        }
-
-
-        outState.putBoolean(SHOW_WIDGET_PICKER, mWidgetPickerShowing);
+        if (mStepIndex > 0) {
+            outState.putInt(CURENT_STEP_INDEX, mStepIndex);
+        }
+        if (mSeekBarPosition > 0) {
+            outState.putLong(CURRENT_SEEK_BAR_POSITION, mSeekBarPosition);
+        }
     }
 
     /**
@@ -260,13 +287,22 @@ public class StepsView extends AppCompatActivity
      */
     private void openWidgetChooser() {
 
-        //TODO: get Selected recipe index from baking
         IngredientWidget.writeIngredientsInSharedPref(StepsView.this,
                 mWidgetIndex,
                 mRecipeName,
                 mIngredientsList);
 
         Toast.makeText(StepsView.this, "Added data to widget", Toast.LENGTH_LONG).show();
-
     }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        try {
+            manager.beginTransaction().remove(videoViewFragment).commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 }

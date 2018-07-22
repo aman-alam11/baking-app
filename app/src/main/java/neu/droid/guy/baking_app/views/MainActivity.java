@@ -110,6 +110,8 @@ public class MainActivity extends AppCompatActivity implements ParseJson.getJson
         Snackbar snackbar = null;
         emptyImageView.setImageDrawable(getResources().getDrawable(drawable));
         emptyImageView.setVisibility(visibilityImageView);
+        mLoadingProgressbar.setVisibility(View.INVISIBLE);
+
         if (shouldShowSnack) {
             // No Internet
             snackbar.make(getWindow().getDecorView(), R.string.no_internet_connectivity,
@@ -203,10 +205,6 @@ public class MainActivity extends AppCompatActivity implements ParseJson.getJson
 
         // Update and replace dummy list with original data
         mLocalBakingList.addAll(listOfBaking);
-//        if (mIndexFromWidget > -1) {
-//            // Intent to StepsView Activity
-//            return;
-//        }
         // Notify the adapter about the change
         mRecipeAdapter.notifyDataSetChanged();
     }
@@ -239,7 +237,7 @@ public class MainActivity extends AppCompatActivity implements ParseJson.getJson
         isDataAvailable = false;
         mSelectRecipeRV.setVisibility(View.INVISIBLE);
         emptyImageView.setVisibility(View.VISIBLE);
-
+        mLoadingProgressbar.setVisibility(View.INVISIBLE);
         final Snackbar errorSnack = Snackbar
                 .make(getWindow().getDecorView(), errorMessage, Snackbar.LENGTH_INDEFINITE);
 

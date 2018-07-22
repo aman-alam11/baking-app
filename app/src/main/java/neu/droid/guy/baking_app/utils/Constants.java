@@ -14,6 +14,9 @@ public class Constants {
     public static final String SHOW_WIDGET_PICKER = "SHOW_WIDGET_PICKER";
     public static final String WIDGET_INDEX_RECIPE_KEY = "WIDGET_INDEX_RECIPE_KEY";
     public static final String WIDGET_STRING_SET_RECIPE_KEY = "WIDGET_STRING_SET_RECIPE_KEY";
+    public static final String IS_TWO_PANE_LAYOUT = "IS_TWO_PANE_LAYOUT";
+    public static final String CURENT_STEP_INDEX = "IS_TWO_PANE_LAYOUT";
+    public static final String CURRENT_SEEK_BAR_POSITION = "CURRENT_SEEK_BAR_POSITION";
 
 
     /**
