@@ -1,4 +1,4 @@
-package neu.droid.guy.baking_app.utils;
+package neu.droid.guy.baking_app.views;
 //https://futurestud.io/tutorials/gson-mapping-of-arrays-and-lists-of-objects
 
 import android.content.Context;
@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import neu.droid.guy.baking_app.model.Baking;
+import neu.droid.guy.baking_app.utils.VolleyNetworkQueue;
 
 public class ParseJson {
 

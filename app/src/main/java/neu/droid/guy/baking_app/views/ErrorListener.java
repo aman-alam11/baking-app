@@ -1,4 +1,4 @@
-package neu.droid.guy.baking_app.utils;
+package neu.droid.guy.baking_app.views;
 
 public interface ErrorListener {
     void getErrorMessage(String errorMessage);

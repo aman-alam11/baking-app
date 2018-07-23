@@ -3,8 +3,12 @@ package neu.droid.guy.baking_app.views;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Parcelable;
+import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 import android.support.design.widget.Snackbar;
+import android.support.test.espresso.IdlingResource;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
@@ -26,8 +30,6 @@ import butterknife.ButterKnife;
 import neu.droid.guy.baking_app.R;
 import neu.droid.guy.baking_app.utils.BuildUrl;
 import neu.droid.guy.baking_app.utils.CheckInternetConnectivity;
-import neu.droid.guy.baking_app.utils.ErrorListener;
-import neu.droid.guy.baking_app.utils.ParseJson;
 import neu.droid.guy.baking_app.utils.VolleyNetworkQueue;
 import neu.droid.guy.baking_app.model.Baking;
 import neu.droid.guy.baking_app.views.adapters.SelectRecipeAdapter;
@@ -53,6 +55,7 @@ public class MainActivity extends AppCompatActivity implements ParseJson.getJson
     ImageView emptyImageView;
     @BindView(R.id.widget_loading_progress_bar)
     ProgressBar mLoadingProgressbar;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
