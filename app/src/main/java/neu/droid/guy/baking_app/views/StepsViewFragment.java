@@ -31,6 +31,12 @@ public class StepsViewFragment extends Fragment {
     public StepsViewFragment() {
     }
 
+    /**
+     * Initialize the new frgamnet
+     * @param listOfSteps The list of steps
+     * @param recipeId the id for the selected recipe
+     * @return
+     */
     public static StepsViewFragment newInstance(List<Steps> listOfSteps, int recipeId) {
         StepsViewFragment fragment = new StepsViewFragment();
         Bundle args = new Bundle();
@@ -98,7 +104,10 @@ public class StepsViewFragment extends Fragment {
         return rootView;
     }
 
-
+    /**
+     * Communicate the selected index between Activity/Fragment and adapter for recycler view
+     * @param position The position of the item clicked in recycler view
+     */
     public void updateSelectedItem(int position) {
         mStepsAdapter.notifyItemChanged(position);
     }

@@ -15,4 +15,7 @@
     <string name="widget_picker_positive_button_text">Show Chosen Recipe Ingredients Widget</string>
     <string name="widget_chooser_error_nodata">Unable to change widget at this time, please try again</string>
     <string name="widget_chooser_title">Choose widget for recipe:</string>
+    <string name="neutral_button_text">Ok</string>
+    <string name="no_refresh_required">All caught Up</string>
+    <string name="get_new_data">Fetching Data</string>
 </resources>

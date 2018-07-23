@@ -2,6 +2,7 @@ package neu.droid.guy.baking_app;
 
 import org.junit.Test;
 
+import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.*;
 
 /**

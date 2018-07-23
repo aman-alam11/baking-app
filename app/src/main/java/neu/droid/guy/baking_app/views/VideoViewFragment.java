@@ -91,7 +91,6 @@ public class VideoViewFragment extends Fragment implements ExoPlayer.EventListen
     private int mWindowIndex = 0;
     private boolean mPlaybackState = true;
 
-
     // Default Constructor
     public VideoViewFragment() {
     }
@@ -116,6 +115,15 @@ public class VideoViewFragment extends Fragment implements ExoPlayer.EventListen
         return videoViewFragment;
     }
 
+    /**
+     * In case the video was playing an activity was rotated, the new same fragment will be recreated
+     * and playback will be resumed from the seek bar position
+     * @param listOfSteps
+     * @param selectedStepNumber
+     * @param isMasterSlave
+     * @param seekPosition
+     * @return
+     */
     public static VideoViewFragment newInstance(List<Steps> listOfSteps, int selectedStepNumber,
                                                 boolean isMasterSlave, long seekPosition) {
         VideoViewFragment videoViewFragment = new VideoViewFragment();
@@ -161,6 +169,7 @@ public class VideoViewFragment extends Fragment implements ExoPlayer.EventListen
             return;
         }
 
+        // Resize the video player in case of orientation changes
         DisplayMetrics displaymetrics = new DisplayMetrics();
         getActivity().getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
         int screenHeight = displaymetrics.heightPixels;
@@ -449,7 +458,6 @@ public class VideoViewFragment extends Fragment implements ExoPlayer.EventListen
 
     @Override
     public void onPlayerError(ExoPlaybackException error) {
-        Log.e("onPlayerError", "onPlayerError");
 
         if (mSelectedStepId == mListOfSteps.size() - 1 || mIsMasterSlave) {
             // End of List => DO Nothing
@@ -537,6 +545,10 @@ public class VideoViewFragment extends Fragment implements ExoPlayer.EventListen
     public void onSeekProcessed() {
     }
 
+    /**
+     * In case the video is playing and not yet completed but the frgamnet is destroyed due to rotation
+     * get the seek bar position and pass it to activity to send it with new fragment
+     */
     @Override
     public void onDestroyView() {
         super.onDestroyView();

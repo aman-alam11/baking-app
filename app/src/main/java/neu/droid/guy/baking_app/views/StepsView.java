@@ -110,6 +110,11 @@ public class StepsView extends AppCompatActivity
         manager.beginTransaction().add(R.id.ingredients_fragment_view, ingredientsFragment).commit();
     }
 
+    /**
+     * Initialize the Video player
+     *
+     * @param stepIndex The selected step's index
+     */
     private void initVideoFragment(int stepIndex) {
         mStepIndex = stepIndex;
         videoViewFragment = VideoViewFragment.newInstance(mStepsList, stepIndex,
@@ -117,6 +122,10 @@ public class StepsView extends AppCompatActivity
         manager.beginTransaction().add(R.id.fragment_frame_id, videoViewFragment).commit();
     }
 
+    /**
+     * Remove old fragment before adding a new one.
+     * In this process, save all the values which will be required in case by media player
+     */
     private void removeCurrentFragment() {
         if (videoViewFragment != null) {
             // Handle in fragment
@@ -295,6 +304,9 @@ public class StepsView extends AppCompatActivity
         Toast.makeText(StepsView.this, "Added data to widget", Toast.LENGTH_LONG).show();
     }
 
+    /**
+     * Remove current Fragment in onPause before adding a new one
+     */
     @Override
     protected void onPause() {
         super.onPause();

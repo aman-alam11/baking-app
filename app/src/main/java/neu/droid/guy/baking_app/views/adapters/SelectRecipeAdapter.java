@@ -25,6 +25,13 @@ public class SelectRecipeAdapter extends RecyclerView.Adapter<SelectRecipeAdapte
         void onItemClicked(int position);
     }
 
+    /**
+     * Default constructor
+     *
+     * @param listOfBakingObj
+     * @param context
+     * @param clickListener
+     */
     public SelectRecipeAdapter(List<Baking> listOfBakingObj,
                                Context context,
                                ItemClickListener clickListener) {
@@ -101,7 +108,7 @@ public class SelectRecipeAdapter extends RecyclerView.Adapter<SelectRecipeAdapte
 
 
     /**
-     *
+     * The View Holder pattern for recycler view
      */
     class SelectRecipeViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         @BindView(R.id.recipe_name)
@@ -119,7 +126,6 @@ public class SelectRecipeAdapter extends RecyclerView.Adapter<SelectRecipeAdapte
 
         private void bindViews(String name, int servings) {
             recipeName.setText(name);
-//            recipeImageMain.setImageResource();
             recipeServesPeopleNum.setText("" + servings);
         }
 

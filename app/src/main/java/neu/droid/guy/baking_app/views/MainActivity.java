@@ -40,11 +40,12 @@ public class MainActivity extends AppCompatActivity implements ParseJson.getJson
         SelectRecipeAdapter.ItemClickListener, ErrorListener {
 
     private SelectRecipeAdapter mRecipeAdapter;
-    List<Baking> mLocalBakingList = new ArrayList<>();
-    ArrayList<String> mRecipeNamesList = new ArrayList<>();
+    private List<Baking> mLocalBakingList = new ArrayList<>();
+    private ArrayList<String> mRecipeNamesList = new ArrayList<>();
     private boolean isDataAvailable;
     private boolean mIsCurrentTwoPaneLayout = false;
-//    private int mIndexFromWidget = -1;
+    private boolean mIsReverseLayout = false;
+    private final int SPAN_COUNT_GRID_TABLET_MODE = 3;
 
     @BindView(R.id.select_recipe_recycler_view)
     RecyclerView mSelectRecipeRV;
@@ -60,8 +61,6 @@ public class MainActivity extends AppCompatActivity implements ParseJson.getJson
         ButterKnife.bind(this);
         setTitle("Recipes");
 
-        // Check if opened by widget, if yes, get data and intent to stepsview
-
         // Check if its a tablet or phone for appropriate layout
         if (findViewById(R.id.master_slave_recipe_view) != null) {
             // Tablet Mode
@@ -69,34 +68,23 @@ public class MainActivity extends AppCompatActivity implements ParseJson.getJson
         }
 
         if (!CheckInternetConnectivity.isInternetConnectivityAvailable(this)) {
+            // No Internet
             handleNoInternet(R.drawable.nointerneterror, View.VISIBLE, true);
             return;
         } else {
+            // Now Internet is available, undo the no-internet phase changes
             handleNoInternet(R.drawable.empty_view, View.INVISIBLE, false);
         }
 
-//        if (getIntent().hasExtra(WIDGET_INDEX_RECIPE_KEY)) {
-//            mIndexFromWidget = getIntent().getExtras().getInt(WIDGET_INDEX_RECIPE_KEY);
-//            // Get all the data for the Steps Screen from Internet
-//            makeInternetRequest();
-//
-//            // Make an intent to open the selected recipe
-//            if (mIndexFromWidget > -1)
-//                onItemClicked(mIndexFromWidget);
-//
-//            return;
-//        }
-
+        // Init RecyclerView
         initRecyclerView(mIsCurrentTwoPaneLayout);
         if (savedInstanceState != null &&
                 savedInstanceState.getParcelableArrayList(RECIPE_INTENT_KEY) != null) {
+            // get Data from saved state in case of rotation
             getResponse(savedInstanceState.<Baking>getParcelableArrayList(RECIPE_INTENT_KEY));
-
         } else {
             makeInternetRequest();
         }
-        // Make a list of all recipe names
-//        getAllRecipeNames();
     }
 
     /**
@@ -107,19 +95,14 @@ public class MainActivity extends AppCompatActivity implements ParseJson.getJson
      * @param shouldShowSnack     Show and hide snackbar based on connectivity
      */
     private void handleNoInternet(int drawable, int visibilityImageView, boolean shouldShowSnack) {
-        Snackbar snackbar = null;
         emptyImageView.setImageDrawable(getResources().getDrawable(drawable));
         emptyImageView.setVisibility(visibilityImageView);
         mLoadingProgressbar.setVisibility(View.INVISIBLE);
 
         if (shouldShowSnack) {
             // No Internet
-            snackbar.make(getWindow().getDecorView(), R.string.no_internet_connectivity,
-                    Snackbar.LENGTH_INDEFINITE).show();
-        } else {
-            if (snackbar != null && snackbar.isShown()) {
-                snackbar.dismiss();
-            }
+            Snackbar.make(getWindow().getDecorView(), R.string.no_internet_connectivity,
+                    Snackbar.LENGTH_LONG).show();
         }
     }
 
@@ -150,7 +133,7 @@ public class MainActivity extends AppCompatActivity implements ParseJson.getJson
     private void setupLinearLayout() {
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-        layoutManager.setReverseLayout(false);
+        layoutManager.setReverseLayout(mIsReverseLayout);
         mSelectRecipeRV.setLayoutManager(layoutManager);
     }
 
@@ -158,9 +141,9 @@ public class MainActivity extends AppCompatActivity implements ParseJson.getJson
      * Setup alternate orientation and recycler view's layout manager in case of tablet
      */
     private void setupGridlayout() {
-        GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 3);
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(this, SPAN_COUNT_GRID_TABLET_MODE);
         gridLayoutManager.setOrientation(GridLayoutManager.VERTICAL);
-        gridLayoutManager.setReverseLayout(false);
+        gridLayoutManager.setReverseLayout(mIsReverseLayout);
         mSelectRecipeRV.setLayoutManager(gridLayoutManager);
     }
 
@@ -241,7 +224,7 @@ public class MainActivity extends AppCompatActivity implements ParseJson.getJson
         final Snackbar errorSnack = Snackbar
                 .make(getWindow().getDecorView(), errorMessage, Snackbar.LENGTH_INDEFINITE);
 
-        errorSnack.setAction("Ok", new View.OnClickListener() {
+        errorSnack.setAction(R.string.neutral_button_text, new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 errorSnack.dismiss();
@@ -252,33 +235,10 @@ public class MainActivity extends AppCompatActivity implements ParseJson.getJson
 
 
     /**
-     * Inflate menu
-     * <p>
-     * <p>
-     * Initialize the contents of the Activity's standard options menu.  You
-     * should place your menu items in to <var>menu</var>.
-     * <p>
-     * <p>This is only called once, the first time the options menu is
-     * displayed.  To update the menu every time it is displayed, see
-     * {@link #onPrepareOptionsMenu}.
-     * <p>
-     * <p>The default implementation populates the menu with standard system
-     * menu items.  These are placed in the {@link Menu#CATEGORY_SYSTEM} group so that
-     * they will be correctly ordered with application-defined menu items.
-     * Deriving classes should always call through to the base implementation.
-     * <p>
-     * <p>You can safely hold on to <var>menu</var> (and any items created
-     * from it), making modifications to it as desired, until the next
-     * time onCreateOptionsMenu() is called.
-     * <p>
-     * <p>When you add items to the menu, you can implement the Activity's
-     * {@link #onOptionsItemSelected} method to handle them there.
+     * Inflate options menu
      *
-     * @param menu The options menu in which you place your items.
-     * @return You must return true for the menu to be displayed;
-     * if you return false it will not be shown.
-     * @see #onPrepareOptionsMenu
-     * @see #onOptionsItemSelected
+     * @param menu The refresh icon as menu on menubar
+     * @return
      */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -315,9 +275,9 @@ public class MainActivity extends AppCompatActivity implements ParseJson.getJson
         switch (item.getItemId()) {
             case R.id.refresh_icon:
                 if (isDataAvailable) {
-                    showSnackBar("All caught Up");
+                    showSnackBar(getString(R.string.no_refresh_required));
                 } else {
-                    showSnackBar("Fetching Data");
+                    showSnackBar(getString(R.string.get_new_data));
                     makeInternetRequest();
                 }
                 return true;
@@ -352,17 +312,4 @@ public class MainActivity extends AppCompatActivity implements ParseJson.getJson
         }
     }
 
-//    private void getAllRecipeNames() {
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                if (mRecipeNamesList != null && mRecipeNamesList.size() > 0) {
-//                    return;
-//                }
-//                for (int i = 0; i < mLocalBakingList.size(); i++) {
-//                    mRecipeNamesList.add(mLocalBakingList.get(i).getName());
-//                }
-//            }
-//        }).start();
-//    }
 }

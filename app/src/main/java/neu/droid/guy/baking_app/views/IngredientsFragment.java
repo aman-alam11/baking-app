@@ -25,9 +25,18 @@ public class IngredientsFragment extends Fragment {
     private List<Ingredients> mListOfIngredients;
     private RecyclerView mIngredientsRecycler;
 
+    /**
+     * Empty Constructor
+     */
     public IngredientsFragment() {
     }
 
+    /**
+     * Pass data to Fragment for instantiation
+     *
+     * @param ingredientsList
+     * @return
+     */
     public static IngredientsFragment newInstance(List<Ingredients> ingredientsList) {
         IngredientsFragment ingredientsFragment = new IngredientsFragment();
         Bundle bundle = new Bundle();
@@ -68,7 +77,11 @@ public class IngredientsFragment extends Fragment {
         return super.onCreateView(inflater, container, savedInstanceState);
     }
 
-
+    /**
+     * Initialize the Recycler View
+     *
+     * @param context The context for initializing recycler view
+     */
     private void initRecyclerView(Context context) {
         LinearLayoutManager layoutManager = new LinearLayoutManager(context);
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
