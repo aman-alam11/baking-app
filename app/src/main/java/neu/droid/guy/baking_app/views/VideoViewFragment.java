@@ -1,5 +1,7 @@
 package neu.droid.guy.baking_app.views;
+//https://stackoverflow.com/questions/11629675/get-screen-width-and-height-in-a-fragment
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.net.Uri;
@@ -11,12 +13,15 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -36,6 +41,7 @@ import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
+import com.google.android.exoplayer2.ui.PlaybackControlView;
 import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 
@@ -76,7 +82,6 @@ public class VideoViewFragment extends Fragment implements ExoPlayer.EventListen
     private Steps mSelectedStep;
     private String mVideoUrl;
     private List<String> mListOfUrls = new ArrayList<>();
-    private static boolean FLAG_ARRAY_UPDATED = false;
     private Context mContext;
     private boolean mIsMasterSlave;
 
@@ -126,6 +131,7 @@ public class VideoViewFragment extends Fragment implements ExoPlayer.EventListen
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         if (savedInstanceState == null) {
             mListOfSteps = getArguments().getParcelableArrayList(STEPS_INTENT_KEY);
             mSelectedStepId = getArguments().getInt(CURRENT_RECIPE_ID);
@@ -146,6 +152,29 @@ public class VideoViewFragment extends Fragment implements ExoPlayer.EventListen
 
         // Get video params from savedstate
         getDataFromSavedInstanceState(savedInstanceState);
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if (mIsMasterSlave) {
+            return;
+        }
+
+        DisplayMetrics displaymetrics = new DisplayMetrics();
+        getActivity().getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
+        int screenHeight = displaymetrics.heightPixels;
+        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) mPlayerView.getLayoutParams();
+
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            params.width = ViewGroup.LayoutParams.MATCH_PARENT;
+            params.height = (int) (screenHeight * 0.9);
+            mPlayerView.setLayoutParams(params);
+        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            params.width = ViewGroup.LayoutParams.MATCH_PARENT;
+            params.height = (int) (screenHeight * 0.4);
+            mPlayerView.setLayoutParams(params);
+        }
     }
 
 
@@ -325,8 +354,6 @@ public class VideoViewFragment extends Fragment implements ExoPlayer.EventListen
             //Dont go to else condition above just because of SDK version
             if (Build.VERSION.SDK_INT > 23) {
                 mPlayerView.setVisibility(View.VISIBLE);
-                // Detect screen size for aspect ratio of video player
-//                resizeVideoView();
                 initializePlayer();
             }
         }
@@ -338,8 +365,6 @@ public class VideoViewFragment extends Fragment implements ExoPlayer.EventListen
         if (mMediaPlayer == null) {
             if (Build.VERSION.SDK_INT <= 23) {
                 mPlayerView.setVisibility(View.VISIBLE);
-                // Detect screen size for aspect ratio of video player
-//                resizeVideoView();
                 mDescriptionTextView.setBackground(null);
                 mDescriptionTextView.setTextColor(getResources().getColor(R.color.black));
                 initializePlayer();
@@ -432,8 +457,6 @@ public class VideoViewFragment extends Fragment implements ExoPlayer.EventListen
         }
 
         // This means we have encountered a picture TextView
-        // Revive data source
-        // Show updated text view
         reviveDataSources(mSelectedStepId + 1);
         noVideoView();
         // release media player
@@ -441,14 +464,6 @@ public class VideoViewFragment extends Fragment implements ExoPlayer.EventListen
 
         // Show Next Button
         mNextVideoButton.setVisibility(View.VISIBLE);
-
-        //Case 1: Next is a picture
-
-        //Case 2: Next is a video
-        // Revive media player
-        // Prepare Media Player Again with new Data
-        // Unhide video player
-        // Hide next button
 
         mNextVideoButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -497,7 +512,6 @@ public class VideoViewFragment extends Fragment implements ExoPlayer.EventListen
             return;
         }
         // Update Datasource in case of next video autoplay
-        Log.e("getCurrentWindowIndex", mMediaPlayer.getCurrentWindowIndex() + " = lksnelwnlnlnlnsef");
         mWindowIndex = mMediaPlayer.getCurrentWindowIndex();
         mSeekBarPosition = mMediaPlayer.getCurrentPosition();
         int index = mListOfSteps.size() - mListOfUrls.size() + mMediaPlayer.getCurrentWindowIndex();
@@ -532,4 +546,5 @@ public class VideoViewFragment extends Fragment implements ExoPlayer.EventListen
             Log.e("VideoViewFrag", "Unable to caste to stepsview activity");
         }
     }
+
 }

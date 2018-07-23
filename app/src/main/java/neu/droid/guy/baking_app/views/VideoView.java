@@ -58,7 +58,12 @@ import static neu.droid.guy.baking_app.utils.Constants.STEP_NUMBER_INTENT;
 import static neu.droid.guy.baking_app.utils.Constants.WINDOW_INDEX;
 
 // TODO: Handle full screen
-// TODO: UI Testing
+
+// TODO: UI Testing views
+// TODO: UI Testing adapters
+// TODO: UI Testing intent stub
+// TODO: UI Testing intent verification
+
 
 public class VideoView extends AppCompatActivity {
     private final String LOG_TAG = getClass().getSimpleName();
@@ -73,7 +78,6 @@ public class VideoView extends AppCompatActivity {
             Bundle extrasBundle = Objects.requireNonNull(getIntent().getExtras());
             getDataFromIntent(extrasBundle);
         }
-
     }
 
     /**
@@ -102,38 +106,6 @@ public class VideoView extends AppCompatActivity {
         VideoViewFragment videoViewFragment =
                 VideoViewFragment.newInstance(mListOfSteps, mSelectedStepNumber, false);
         manager.beginTransaction().add(R.id.fragment_frame_id, videoViewFragment).commit();
-    }
-
-    /**
-     * https://codelabs.developers.google.com/codelabs/exoplayer-intro/
-     */
-    @Override
-    protected void onStart() {
-        super.onStart();
-        Log.e(LOG_TAG, " Activity onStart() called");
-
-    }
-
-    /**
-     * https://codelabs.developers.google.com/codelabs/exoplayer-intro/
-     */
-    @Override
-    protected void onResume() {
-        super.onResume();
-        Log.e(LOG_TAG, " Activity onResume called");
-    }
-
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        Log.e(LOG_TAG, "Activity onPause Called");
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        Log.e(LOG_TAG, "Activity onStop Called");
     }
 
 }

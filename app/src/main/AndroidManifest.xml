@@ -20,7 +20,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".views.StepsView" />
-        <activity android:name=".views.VideoView" />
+        <activity android:name=".views.VideoView"
+            android:configChanges="orientation"/>
 
         <!-- Register Widget as a broadcast reciever -->
 
