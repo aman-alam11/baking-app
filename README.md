@@ -13,4 +13,20 @@ An app that shows baking videos for different recipes
 * Using Volley to check cache and use it (no need to make futile internet calls everytime)
 * Use of parcelable to transfer data with Intents
 
-Check Screenshots:
+## Check Screenshots:
+
+### Normal phone Home and Home for tablets
+![Home Screen](https://github.com/aman-alam11/baking-app/blob/master/screenshots/1.png) 
+![Home for tablets](https://github.com/aman-alam11/baking-app/blob/master/screenshots/home-tablet.png)
+
+### Split screen for tablets and normal playback for phones
+![Split Screen for tablets](https://github.com/aman-alam11/baking-app/blob/master/screenshots/Split%20mode-tablet.png)
+![Video Playback using Exoplayer](https://github.com/aman-alam11/baking-app/blob/master/screenshots/video.png)
+
+### Widgets
+![Widgets](https://github.com/aman-alam11/baking-app/blob/master/screenshots/widget.png)
+
+### Details Screens:
+
+![Details](https://github.com/aman-alam11/baking-app/blob/master/screenshots/2.png)
+![Details2](https://github.com/aman-alam11/baking-app/blob/master/screenshots/3.png)
